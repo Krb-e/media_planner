@@ -18,3 +18,10 @@ Abrir `src/index.html` en el navegador, o servirlo:
 ```bash
 npx serve src
 ```
+
+## Deploy
+
+El proyecto de Vercel está conectado a este repo:
+
+- Push a `main` → producción (`mediaplan.krab-e.space`).
+- Push a cualquier otra rama → deploy de preview con URL propia.
