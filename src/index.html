@@ -17,7 +17,7 @@
   --ke-border:rgba(230,230,230,0.07); --ke-orange:#ff700a;
   --ke-ok:#9dffbf; --ke-warn:#ffd88a; --ke-bad:#ffb0a0;
   --ke-green:#4dcc80; --ke-purple:#c084fc; --ke-blue:#4fa3ff; --ke-pink:#ff6eb4;
-  --ke-cyan:#2dd4bf; --ke-red:#ff5a5f;
+  --ke-cyan:#2dd4bf; --ke-red:#ff5a5f; --ke-email:#b8e65c; --ke-org:#7a7a7a;
 }
 * { margin:0; padding:0; box-sizing:border-box; }
 html { background: var(--ke-bg); }
@@ -85,6 +85,10 @@ body::after {
 .field.ga::before { background:var(--ke-purple); }
 .field.tiktok::before { background:var(--ke-cyan); }
 .field.pinterest::before { background:var(--ke-pink); }
+.field.email::before { background:var(--ke-email); }
+.field.org::before { background:var(--ke-org); }
+.ch-dot { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:7px; vertical-align:baseline; }
+tr.ref td { color:var(--ke-muted); }
 .field.brand::before { background:var(--ke-red); }
 .field label { display:block; font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--ke-muted); margin-bottom:8px; }
 .field .in { display:flex; align-items:center; gap:8px; }
@@ -249,7 +253,7 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
       <span class="ke-sec-label">2 · Objetivo y rentabilidad</span>
       <span class="ke-sec-pill ke-pill-orange">Lo define el cliente</span>
     </div>
-    <div class="ke-grid-2">
+    <div class="ke-grid-4">
       <div class="field">
         <label>Facturación objetivo</label>
         <div class="in"><span class="pre">$</span><input type="number" id="objetivo" min="0" placeholder="0"></div>
@@ -258,7 +262,17 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
       <div class="field">
         <label>ACOS límite</label>
         <div class="in"><input type="number" id="acos" min="0.1" max="100" step="0.1" placeholder="10"><span class="suf">%</span></div>
-        <div class="hint">Máximo % de la facturación que se puede invertir en ads. Define el presupuesto de performance.</div>
+        <div class="hint">Máximo % de la facturación de pauta que se puede invertir en ads. Define el presupuesto de performance.</div>
+      </div>
+      <div class="field email">
+        <label>% del objetivo · Email</label>
+        <div class="in"><input type="number" id="pctEmail" min="0" max="99" step="1" placeholder="0"><span class="suf">%</span></div>
+        <div class="hint">Parte del objetivo que tiene que traer email marketing (Perfit). Dejá en 0 si no se usa.</div>
+      </div>
+      <div class="field org">
+        <label>% del objetivo · Orgánico</label>
+        <div class="in"><input type="number" id="pctOrg" min="0" max="99" step="1" placeholder="0"><span class="suf">%</span></div>
+        <div class="hint">Directo, orgánico y SEO según el histórico (GA4). Se toma como referencia, no se proyecta.</div>
       </div>
     </div>
 
@@ -342,6 +356,64 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
         <div class="hint">GA4 → facturación ÷ transacciones, último mes.</div>
       </div>
     </div>
+
+    <div id="emailForm" style="display:none">
+    <div class="ke-sec-head">
+      <div class="ke-sec-line"></div>
+      <span class="ke-sec-label">5 · Email marketing</span>
+      <span class="ke-sec-pill ke-pill-orange">Perfit + GA4 · último mes</span>
+    </div>
+    <div class="ke-grid-3">
+      <div class="field email">
+        <label>Envíos de campaña en el mes</label>
+        <div class="in"><input type="number" id="emailSends" min="0" step="1" placeholder="0"></div>
+        <div class="hint">Newsletters y promos que planeamos mandar este mes.</div>
+      </div>
+      <div class="field email">
+        <label>Contactos activos</label>
+        <div class="in"><input type="number" id="emailContacts" min="0" step="1" placeholder="0"></div>
+        <div class="hint">Perfit → Contactos, sin desuscriptos ni rebotados.</div>
+      </div>
+      <div class="field email">
+        <label>CTR de campañas</label>
+        <div class="in"><input type="number" id="emailCtr" min="0" step="0.01" placeholder="0"><span class="suf">%</span></div>
+        <div class="hint">Perfit → Reportes de campañas: clics únicos ÷ entregados, promedio del último mes.</div>
+      </div>
+      <div class="field ga">
+        <label>Tasa de conversión · Email</label>
+        <div class="in"><input type="number" id="emailCvr" min="0" step="0.01" placeholder="0"><span class="suf">%</span></div>
+        <div class="hint">GA4 → Adquisición de tráfico → canal “Email”: transacciones ÷ sesiones.</div>
+      </div>
+      <div class="field ga">
+        <label>Ticket promedio · Email</label>
+        <div class="in"><span class="pre">$</span><input type="number" id="emailAov" min="0" step="0.01" placeholder="0"></div>
+        <div class="hint">GA4 → canal “Email”: ingresos ÷ transacciones.</div>
+      </div>
+      <div class="field ga">
+        <label>Facturación de automations</label>
+        <div class="in"><span class="pre">$</span><input type="number" id="emailAuto" min="0" step="1" placeholder="0"></div>
+        <div class="hint">GA4 → canal “Email”, campañas de carrito abandonado, bienvenida y post-compra (utm_campaign). Si no tienen UTM, Perfit por clic.</div>
+      </div>
+    </div>
+    <div class="ke-grid-3">
+      <div class="field email">
+        <label>Fee mensual de Perfit</label>
+        <div class="in"><span class="pre">$</span><input type="number" id="emailFee" min="0" step="1" placeholder="0"></div>
+        <div class="hint">Opcional. Lo que paga el cliente por el plan del mes. Entra en el costo de email y en el MER, no en el ACOS.</div>
+      </div>
+      <div class="field meta">
+        <label>Inversión captación de leads · Meta</label>
+        <div class="in"><span class="pre">$</span><input type="number" id="leadInv" min="0" step="1" placeholder="0"></div>
+        <div class="hint">Opcional. Campañas de formulario (cliente potencial) para sumar suscriptores. No se mide con ACOS.</div>
+      </div>
+      <div class="field meta">
+        <label>Costo por lead · Meta</label>
+        <div class="in"><span class="pre">$</span><input type="number" id="leadCpl" min="0" step="0.01" placeholder="0"></div>
+        <div class="hint">Administrador de anuncios → costo por cliente potencial, último mes.</div>
+      </div>
+    </div>
+    <div class="ke-alert ke-a-warn"><p>La conversión, el ticket y las automations salen de <strong>GA4</strong> para todos los clientes: atribuye por último clic y no se superpone con Meta ni Google. Chequeá que los links de Perfit tengan <strong>utm_medium=email</strong>; si no, las ventas caen en “Directo”.</p></div>
+    </div>
   </div>
 
   <!-- ============ RESULTS ============ -->
@@ -355,22 +427,23 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
 
     <div class="ke-sec-head">
       <div class="ke-sec-line g"></div>
-      <span class="ke-sec-label">5 · Proyección del mes</span>
+      <span class="ke-sec-label">6 · Proyección del mes</span>
       <span id="statusChip"></span>
     </div>
 
     <div id="statusAlert"></div>
 
     <div class="ke-grid-4">
-      <div class="ke-kc"><div class="ke-kl">Inversión total</div><div class="ke-kv" id="kInv">—</div><div class="ke-ks">Objetivo × ACOS límite</div></div>
+      <div class="ke-kc"><div class="ke-kl">Inversión total</div><div class="ke-kv" id="kInv">—</div><div class="ke-ks" id="kInvS">Objetivo × ACOS límite</div></div>
       <div class="ke-kc"><div class="ke-kl">Inversión diaria</div><div class="ke-kv w" id="kInvDay">—</div><div class="ke-ks" id="kInvDayS">—</div></div>
       <div class="ke-kc o"><div class="ke-kl">Facturación proyectada</div><div class="ke-kv o" id="kFact">—</div><div class="ke-ks" id="kFactS">—</div></div>
       <div class="ke-kc b"><div class="ke-kl">Conversiones proy.</div><div class="ke-kv b" id="kConv">—</div><div class="ke-ks" id="kConvS">—</div></div>
     </div>
-    <div class="ke-grid-3">
+    <div class="ke-grid-4">
       <div class="ke-kc"><div class="ke-kl">CPA proyectado</div><div class="ke-kv w" id="kCpa">—</div><div class="ke-ks">Inversión ÷ conversiones</div></div>
       <div class="ke-kc"><div class="ke-kl">ACOS proyectado</div><div class="ke-kv" id="kAcos">—</div><div class="ke-ks" id="kAcosS">—</div></div>
       <div class="ke-kc g"><div class="ke-kl">ROAS proyectado</div><div class="ke-kv g" id="kRoas">—</div><div class="ke-ks">Facturación ÷ inversión</div></div>
+      <div class="ke-kc p"><div class="ke-kl">MER total</div><div class="ke-kv" id="kMer" style="color:var(--ke-purple)">—</div><div class="ke-ks" id="kMerS">Inversión ÷ facturación total</div></div>
     </div>
 
     <div class="ke-block">
@@ -390,10 +463,39 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
       </div>
     </div>
 
+    <div class="ke-block" id="emailBlock" style="display:none">
+      <div class="ke-block-top" style="background:linear-gradient(90deg,var(--ke-email),rgba(184,230,92,.06))"></div>
+      <div class="ke-bh"><span class="ke-bt">Proyección email marketing</span><span class="ke-bt">Perfit + GA4</span></div>
+      <div class="tbl-scroll">
+      <table class="ke-t">
+        <thead><tr>
+          <th>Fuente</th><th>Cómo se calcula</th><th class="num">Clicks</th><th class="num">Conversiones</th><th class="num acc">Facturación proy.</th>
+        </tr></thead>
+        <tbody id="emailBody"></tbody>
+        <tfoot id="emailFoot"></tfoot>
+      </table>
+      </div>
+    </div>
+
+    <div class="ke-block">
+      <div class="ke-block-top"></div>
+      <div class="ke-bh"><span class="ke-bt">Estado del plan por canal</span><span class="ke-bt" id="mixMonth"></span></div>
+      <div class="tbl-scroll">
+      <table class="ke-t">
+        <thead><tr>
+          <th>Canal</th><th class="num">Meta del canal</th><th class="num acc">Proyección</th><th class="num">Cumplimiento</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="mixBody"></tbody>
+        <tfoot id="mixFoot"></tfoot>
+      </table>
+      </div>
+    </div>
+    <div id="mixAlert"></div>
+
     <!-- ============ CAMPAIGNS ============ -->
     <div class="ke-sec-head">
       <div class="ke-sec-line b"></div>
-      <span class="ke-sec-label">6 · Media plan por campaña</span>
+      <span class="ke-sec-label">7 · Media plan por campaña</span>
       <span id="campSumChips" class="no-print"></span>
       <button class="btn no-print" onclick="addCampaign()">+ Agregar campaña</button>
     </div>
@@ -420,7 +522,7 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
     <!-- ============ BRANDING (paralelo) ============ -->
     <div class="ke-sec-head">
       <div class="ke-sec-line r"></div>
-      <span class="ke-sec-label">7 · Campañas de branding / otros objetivos</span>
+      <span class="ke-sec-label">8 · Campañas de branding / otros objetivos</span>
       <span class="ke-sec-pill ke-pill-red">Fuera del objetivo · No afecta ACOS</span>
       <button class="btn no-print" onclick="addBrand()">+ Agregar campaña</button>
     </div>
@@ -450,7 +552,7 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
   </div>
 
   <div id="emptyState" class="ke-alert ke-a-warn" style="margin-top:24px">
-    <p><strong>Completá los campos de arriba para generar la proyección.</strong> Necesitás: facturación objetivo, ACOS límite, una distribución por canal que sume 100%, las métricas de cada canal activo (CPM + CTR en Meta / TikTok / Pinterest, CPC en Google), tasa de conversión y ticket promedio.</p>
+    <p><strong>Completá los campos de arriba para generar la proyección.</strong> Necesitás: facturación objetivo, ACOS límite, una distribución por canal que sume 100%, las métricas de cada canal activo (CPM + CTR en Meta / TikTok / Pinterest, CPC en Google), tasa de conversión y ticket promedio. Si asignás un % del objetivo a Email, completá también la sección de email marketing.</p>
   </div>
 
 </div>
@@ -466,7 +568,9 @@ const CH = [
   { key:'pinterest', label:'Pinterest Ads', type:'cpm', dist:'distPinterest', cpm:'cpmPinterest', ctr:'ctrPinterest' },
 ];
 const shortLabel = key => (CH.find(c=>c.key===key)||{label:key}).label.replace(' Ads','');
-const F = ['cliente','mes','autor','objetivo','acos',
+const EMAIL_F = ['emailSends','emailContacts','emailCtr','emailCvr','emailAov'];
+const F = ['cliente','mes','autor','objetivo','acos','pctEmail','pctOrg',
+  'emailSends','emailContacts','emailCtr','emailCvr','emailAov','emailAuto','emailFee','leadInv','leadCpl',
   'distMeta','distGoogle','distTiktok','distPinterest',
   'cpmMeta','ctrMeta','cpmTiktok','ctrTiktok','cpmPinterest','ctrPinterest','cpcGoogle',
   'cvr','aov'];
@@ -516,9 +620,17 @@ function compute() {
       else { if (!(val(c.cpc) > 0)) metricsOk = false; }
     }
   });
-  if (!(baseOk && metricsOk)) return null;
+  // Reparto del objetivo: email y orgánico se descuentan; el resto es la meta de pauta
+  const pctEmail = val('pctEmail') > 0 ? val('pctEmail') : 0;
+  const pctOrg = val('pctOrg') > 0 ? val('pctOrg') : 0;
+  const splitOk = pctEmail + pctOrg < 100;
+  const emailOk = pctEmail === 0 || (EMAIL_F.every(id => val(id) > 0) && !(val('emailAuto') < 0));
+  if (!(baseOk && metricsOk && splitOk && emailOk)) return null;
 
-  const inv = objetivo * acos / 100;
+  const emailGoal = objetivo * pctEmail / 100;
+  const orgGoal = objetivo * pctOrg / 100;
+  const paidObj = objetivo - emailGoal - orgGoal;
+  const inv = paidObj * acos / 100;
   const days = daysInMonth(document.getElementById('mes').value);
 
   const channels = {};
@@ -533,7 +645,7 @@ function compute() {
     }
     const cconv = cclicks * cvr / 100;
     const cfact = cconv * aov;
-    channels[c.key] = { key:c.key, label:c.label, type:c.type, dist:dpct, inv:cinv, daily:cinv/days,
+    channels[c.key] = { key:c.key, label:c.label, type:c.type, dist:dpct, inv:cinv, daily:cinv/days, goal:paidObj*dpct/100,
       impr:cimpr, clicks:cclicks, conv:cconv, fact:cfact };
     if (dpct > 0) { fact += cfact; conv += cconv; clicks += cclicks; if (isFinite(cimpr)) impr += cimpr; }
   });
@@ -541,13 +653,40 @@ function compute() {
   const roas = fact / inv;
   const acosProj = fact > 0 ? inv / fact * 100 : NaN;
   const cpa = conv > 0 ? inv / conv : NaN;
-  const invNeeded = roas > 0 ? objetivo / roas : NaN;                 // inversión para llegar al objetivo con estas métricas
-  const acosNeeded = isFinite(invNeeded) ? invNeeded / objetivo * 100 : NaN;
-  const cvrNeeded = fact > 0 ? cvr * objetivo / fact : NaN;           // CVR para cerrar sin cambiar presupuesto
+  const invNeeded = roas > 0 ? paidObj / roas : NaN;                  // inversión para llegar a la meta de pauta con estas métricas
+  const acosNeeded = isFinite(invNeeded) ? invNeeded / paidObj * 100 : NaN;
+  const cvrNeeded = fact > 0 ? cvr * paidObj / fact : NaN;            // CVR para cerrar sin cambiar presupuesto
+
+  // Email: campañas (contactos × envíos × CTR × CVR × ticket) + automations del último mes
+  let email = null;
+  if (pctEmail > 0) {
+    const sends = val('emailSends'), contacts = val('emailContacts');
+    const eCtr = val('emailCtr'), eCvr = val('emailCvr'), eAov = val('emailAov');
+    const auto = val('emailAuto') > 0 ? val('emailAuto') : 0;
+    const fee = val('emailFee') > 0 ? val('emailFee') : 0;
+    const leadInv = val('leadInv') > 0 ? val('leadInv') : 0, leadCpl = val('leadCpl');
+    const leads = leadInv > 0 && leadCpl > 0 ? leadInv / leadCpl : 0;
+    // Los leads entran a lo largo del mes: en promedio reciben la mitad de los envíos
+    const baseContacts = contacts + leads / 2;
+    const eClicks = baseContacts * sends * eCtr / 100;
+    const eConv = eClicks * eCvr / 100;
+    const campFact = eConv * eAov;
+    const revPerSend = (contacts + leads) * eCtr / 100 * eCvr / 100 * eAov;
+    const leadFact = leads / 2 * sends * eCtr / 100 * eCvr / 100 * eAov;
+    email = { goal:emailGoal, sends, contacts, ctr:eCtr, cvr:eCvr, aov:eAov, auto, fee, leadInv, leadCpl, leads, leadFact,
+      cost: fee + leadInv,
+      clicks:eClicks, conv:eConv, campFact, autoConv: eAov > 0 ? auto / eAov : 0,
+      fact: campFact + auto, revPerSend };
+  }
+  const totalFact = fact + (email ? email.fact : 0) + orgGoal;
+  const totalCost = inv + (email ? email.cost : 0);
+  const mer = totalFact > 0 ? totalCost / totalFact * 100 : NaN;
 
   return { objetivo, acos, cvr, aov, inv, days, dist, distSum,
     channels, fact, conv, clicks, impr, roas, acosProj, cpa,
-    invNeeded, acosNeeded, cvrNeeded };
+    invNeeded, acosNeeded, cvrNeeded,
+    pctEmail, pctOrg, emailGoal, orgGoal, paidObj, split: pctEmail + pctOrg > 0,
+    email, totalFact, totalCost, mer };
 }
 
 /* ================= RENDER ================= */
@@ -561,6 +700,7 @@ function renderDistChip() {
 function render() {
   const m = compute();
   renderDistChip();
+  document.getElementById('emailForm').style.display = val('pctEmail') > 0 ? '' : 'none';
   document.getElementById('results').style.display = m ? '' : 'none';
   document.getElementById('emptyState').style.display = m ? 'none' : '';
   document.getElementById('hdrInv').textContent = m ? fmtMoney(m.inv) : '—';
@@ -571,21 +711,25 @@ function render() {
   const activeLabels = m ? CH.filter(c => m.channels[c.key].dist > 0).map(c => shortLabel(c.key)) : [];
   document.getElementById('subLine').textContent =
     (cliente ? cliente + ' · ' : '') + (mes ? mes + ' · ' : '') + 'Proyección por ACOS objetivo' +
-    (activeLabels.length ? ' · ' + activeLabels.join(' + ') : '');
+    (activeLabels.length ? ' · ' + activeLabels.join(' + ') + (m && m.email ? ' + Email' : '') : '');
   if (!m) { renderBrand(null); save(); return; }
 
   // KPIs
   const set = (id,v) => document.getElementById(id).textContent = v;
   set('kInv', fmtMoney(m.inv));
+  set('kInvS', m.split ? 'Meta de pauta × ACOS límite' : 'Objetivo × ACOS límite');
   set('kInvDay', fmtMoney(m.inv / m.days)); set('kInvDayS', m.days + ' días del mes');
-  set('kFact', fmtMoney(m.fact)); set('kFactS', 'Objetivo: ' + fmtMoney(m.objetivo));
+  set('kFact', fmtMoney(m.fact)); set('kFactS', (m.split ? 'Meta de pauta: ' : 'Objetivo: ') + fmtMoney(m.paidObj));
   set('kConv', fmtInt(m.conv)); set('kConvS', 'Ventas estimadas del mes');
   set('kCpa', fmtMoney(m.cpa));
   set('kAcos', fmtPct(m.acosProj)); set('kAcosS', 'Límite: ' + fmtPct(m.acos,1));
   set('kRoas', fmtDec(m.roas,2) + 'x');
+  set('kMer', fmtPct(m.mer)); set('kMerS', (m.email && m.email.cost > 0 ? 'Pauta + email' : 'Inversión') + ' ÷ facturación total (' + fmtMoney(m.totalFact) + ')');
 
   renderStatus(m);
   renderChannels(m);
+  renderEmail(m);
+  renderMix(m);
   renderCampaigns(m);
   renderBrand(m);
 
@@ -593,6 +737,7 @@ function render() {
   document.getElementById('planTitle').textContent = 'Media plan' + (cliente ? ' · ' + cliente : '');
   document.getElementById('planMonth').textContent = mes;
   document.getElementById('brandMonth').textContent = mes;
+  document.getElementById('mixMonth').textContent = mes;
   document.getElementById('footerLine').textContent =
     'Media Plan' + (cliente ? ' · ' + cliente : '') + (mes ? ' · ' + mes : '') + (autor ? ' · ' + autor : '') + ' · Krab-e';
   renderAssumptions(m);
@@ -601,7 +746,8 @@ function render() {
 
 // Conclusión en primera persona: el Paid Media le habla al cliente
 function renderStatus(m) {
-  const ratio = m.fact / m.objetivo;
+  const ratio = m.fact / m.paidObj;
+  const obj = m.split ? 'la meta de pauta' : 'tu objetivo';
   const chip = document.getElementById('statusChip');
   const alert = document.getElementById('statusAlert');
   const acosGap = m.acosNeeded - m.acos;
@@ -609,20 +755,20 @@ function renderStatus(m) {
   if (ratio >= 1) {
     chip.innerHTML = '<span class="ke-chip ke-c-ok">El plan cierra</span>';
     alert.innerHTML = '<div class="ke-alert ke-a-ok"><p><strong>El plan cierra.</strong> Con las métricas de tus cuentas, invirtiendo ' + fmtMoney(m.inv) +
-      ' proyectamos ' + fmtMoney(m.fact) + ' de facturación (' + fmtDec(ratio*100,0) + '% de tu objetivo), con un ACOS de ' + fmtPct(m.acosProj) +
+      ' proyectamos ' + fmtMoney(m.fact) + ' de facturación (' + fmtDec(ratio*100,0) + '% de ' + obj + '), con un ACOS de ' + fmtPct(m.acosProj) +
       ' — dentro del límite de ' + fmtPct(m.acos,1) + ' que acordamos. ' +
       (ratio >= 1.15 ? 'Incluso nos queda aire: podemos sostener la inversión y empujar por encima del objetivo, o bajarla y mantener la rentabilidad.'
                      : 'Arrancamos con esta estructura y monitoreamos las primeras dos semanas para optimizar.') + '</p></div>';
   } else if (ratio >= 0.9) {
     chip.innerHTML = '<span class="ke-chip ke-c-warn">Ajustado</span>';
-    alert.innerHTML = '<div class="ke-alert ke-a-warn"><p><strong>El plan queda muy cerca: ' + fmtDec(ratio*100,0) + '% de tu objetivo.</strong> Nos faltan ' +
-      fmtMoney(m.objetivo - m.fact) + '. Tenemos dos caminos: subir la inversión a ' + fmtMoney(m.invNeeded) +
+    alert.innerHTML = '<div class="ke-alert ke-a-warn"><p><strong>El plan queda muy cerca: ' + fmtDec(ratio*100,0) + '% de ' + obj + '.</strong> Nos faltan ' +
+      fmtMoney(m.paidObj - m.fact) + '. Tenemos dos caminos: subir la inversión a ' + fmtMoney(m.invNeeded) +
       ' —lo que significa trabajar con un ACOS de ' + fmtPct(m.acosNeeded) + ', unos ' + fmtDec(acosGap,1) + ' puntos más que el límite actual— o, sin tocar el presupuesto, mejorar la conversión ' + cvrTxt +
       '. Con un ajuste de creativos o de la landing lo cerramos.</p></div>';
   } else {
     chip.innerHTML = '<span class="ke-chip ke-c-danger">No cierra</span>';
     alert.innerHTML = '<div class="ke-alert"><p><strong>Con las métricas actuales el plan no cierra.</strong> Proyectamos ' + fmtMoney(m.fact) + ' (' +
-      fmtDec(ratio*100,0) + '% del objetivo de ' + fmtMoney(m.objetivo) + '). Para llegar necesitaríamos invertir ' + fmtMoney(m.invNeeded) +
+      fmtDec(ratio*100,0) + '% de ' + obj + ' de ' + fmtMoney(m.paidObj) + '). Para llegar necesitaríamos invertir ' + fmtMoney(m.invNeeded) +
       ', que nos lleva a un ACOS de ' + fmtPct(m.acosNeeded) + ' — unos ' + fmtDec(acosGap,1) + ' puntos por encima del límite de ' + fmtPct(m.acos,1) +
       '. Te propongo una de tres: (1) revisemos el objetivo o aceptemos un ACOS ' + fmtDec(acosGap,1) + ' puntos más alto, (2) trabajemos la conversión ' + cvrTxt +
       ' o el ticket promedio, o (3) reasignemos el mix hacia el canal más eficiente antes de escalar.</p></div>';
@@ -648,6 +794,74 @@ function renderChannels(m) {
     fmtMoney(m.cpa) + '</td><td class="num">' + fmtDec(m.roas,2) + 'x</td></tr>';
 }
 
+function statusChip(ratio) {
+  if (!isFinite(ratio)) return '';
+  if (ratio >= 1) return '<span class="ke-chip ke-c-ok">Cierra</span>';
+  if (ratio >= 0.9) return '<span class="ke-chip ke-c-warn">Ajustado</span>';
+  return '<span class="ke-chip ke-c-danger">No cierra</span>';
+}
+const CH_COLOR = { meta:'var(--ke-blue)', google:'var(--ke-green)', tiktok:'var(--ke-cyan)', pinterest:'var(--ke-pink)', email:'var(--ke-email)', org:'var(--ke-org)' };
+const dot = key => '<span class="ch-dot" style="background:' + CH_COLOR[key] + '"></span>';
+
+function renderEmail(m) {
+  const block = document.getElementById('emailBlock');
+  const e = m.email;
+  block.style.display = e ? '' : 'none';
+  if (!e) return;
+  document.getElementById('emailBody').innerHTML =
+    '<tr><td><strong>Campañas</strong></td><td style="color:var(--ke-muted)">' + (e.leads > 0 ? '(' + fmtInt(e.contacts) + ' + ' + fmtInt(e.leads/2) + ' leads prom.)' : fmtInt(e.contacts)) + ' contactos × ' + fmtInt(e.sends) +
+      ' envíos × CTR ' + fmtPct(e.ctr, 2) + ' × CVR ' + fmtPct(e.cvr, 2) + '</td><td class="num">' + fmtInt(e.clicks) + '</td><td class="num">' +
+      fmtInt(e.conv) + '</td><td class="num" style="color:var(--ke-orange)">' + fmtMoney(e.campFact) + '</td></tr>' +
+    (e.leads > 0 ? '<tr><td><strong>Leads nuevos (Meta)</strong></td><td style="color:var(--ke-muted)">' + fmtMoney(e.leadInv) + ' ÷ CPL ' + fmtMoney(e.leadCpl) +
+      ' = ' + fmtInt(e.leads) + ' contactos · entran durante el mes (incluido en campañas)</td><td class="num">—</td><td class="num">—</td><td class="num" style="color:var(--ke-muted)">' +
+      fmtMoney(e.leadFact) + '</td></tr>' : '') +
+    '<tr><td><strong>Automations</strong></td><td style="color:var(--ke-muted)">Carrito abandonado, bienvenida y post-compra · último mes (GA4)</td>' +
+      '<td class="num">—</td><td class="num">' + fmtInt(e.autoConv) + '</td><td class="num" style="color:var(--ke-orange)">' + fmtMoney(e.auto) + '</td></tr>';
+  document.getElementById('emailFoot').innerHTML =
+    '<tr><td>TOTAL EMAIL</td><td style="color:var(--ke-muted)">Ticket ' + fmtMoney(e.aov) + '</td><td class="num">' + fmtInt(e.clicks) +
+    '</td><td class="num">' + fmtInt(e.conv + e.autoConv) + '</td><td class="num" style="color:var(--ke-orange)">' + fmtMoney(e.fact) + '</td></tr>' +
+    (e.cost > 0 ? '<tr><td>COSTO EMAIL</td><td style="color:var(--ke-muted)">Fee Perfit ' + fmtMoney(e.fee) + ' + leads ' + fmtMoney(e.leadInv) +
+      '</td><td class="num"></td><td class="num"></td><td class="num">' + fmtMoney(e.cost) + ' · ROAS ' + fmtDec(e.fact / e.cost, 1) + 'x</td></tr>' : '');
+}
+
+function renderMix(m) {
+  const rows = CH.map(c => m.channels[c.key]).filter(c => c.dist > 0)
+    .map(c => ({ key:c.key, label:shortLabel(c.key), goal:c.goal, proj:c.fact }));
+  if (m.email) rows.push({ key:'email', label:'Email · Perfit', goal:m.email.goal, proj:m.email.fact });
+  const row = r => { const ratio = r.goal > 0 ? r.proj / r.goal : NaN;
+    return '<tr><td>' + dot(r.key) + '<strong>' + r.label + '</strong></td><td class="num">' + fmtMoney(r.goal) + '</td><td class="num" style="color:var(--ke-orange)">' +
+      fmtMoney(r.proj) + '</td><td class="num">' + (isFinite(ratio) ? fmtDec(ratio*100,0) + '%' : '—') + '</td><td>' + statusChip(ratio) + '</td></tr>'; };
+  let html = rows.map(row).join('');
+  if (m.orgGoal > 0) html += '<tr class="ref"><td>' + dot('org') + 'Orgánico / directo</td><td class="num">' + fmtMoney(m.orgGoal) +
+    '</td><td class="num">Histórico</td><td class="num">—</td><td>Referencia</td></tr>';
+  document.getElementById('mixBody').innerHTML = html;
+  const totRatio = m.totalFact / m.objetivo;
+  document.getElementById('mixFoot').innerHTML =
+    '<tr><td>TOTAL</td><td class="num">' + fmtMoney(m.objetivo) + '</td><td class="num" style="color:var(--ke-orange)">' + fmtMoney(m.totalFact) +
+    '</td><td class="num">' + fmtDec(totRatio*100,0) + '%</td><td>' + statusChip(totRatio) + '</td></tr>';
+
+  // Alerta de email: cuánto falta y qué palancas hay
+  const alertEl = document.getElementById('mixAlert');
+  const e = m.email;
+  if (!e) { alertEl.innerHTML = ''; return; }
+  const gap = e.goal - e.fact;
+  if (gap <= 0) {
+    alertEl.innerHTML = '<div class="ke-alert ke-a-ok"><p><strong>Email cierra su meta.</strong> Proyectamos ' + fmtMoney(e.fact) + ' contra una meta de ' +
+      fmtMoney(e.goal) + ' (' + fmtDec(e.fact / e.goal * 100, 0) + '%).</p></div>';
+    return;
+  }
+  const opts = [];
+  if (e.revPerSend > 0) {
+    const extra = Math.ceil(gap / e.revPerSend);
+    opts.push('sumar ' + extra + ' envío' + (extra === 1 ? '' : 's') + ' de campaña (≈ ' + fmtMoney(e.revPerSend) + ' por envío con las métricas actuales)');
+  }
+  opts.push('activar o mejorar automations (recompra, carrito abandonado)');
+  const spare = rows.filter(r => r.key !== 'email' && r.proj - r.goal >= gap).map(r => r.label);
+  if (spare.length) opts.push('pasar la diferencia a ' + spare.join(' o ') + ', que tiene margen');
+  const cls = e.fact / e.goal >= 0.9 ? 'ke-a-warn' : '';
+  alertEl.innerHTML = '<div class="ke-alert ' + cls + '"><p><strong>A email le faltan ' + fmtMoney(gap) + '.</strong> Opciones: ' + opts.join(', ') + '.</p></div>';
+}
+
 function renderAssumptions(m) {
   const parts = [];
   parts.push('Facturación objetivo: <b>' + fmtMoney(m.objetivo) + '</b>');
@@ -661,6 +875,10 @@ function renderAssumptions(m) {
   }});
   parts.push('Conv.: <b>' + fmtPct(m.cvr) + '</b>');
   parts.push('Ticket: <b>' + fmtMoney(m.aov) + '</b>');
+  if (m.email) parts.push('Email: <b>' + fmtDec(m.pctEmail,0) + '% del objetivo · ' + fmtInt(m.email.sends) + ' envíos · ' + fmtInt(m.email.contacts) +
+    ' contactos' + (m.email.leads > 0 ? ' + ' + fmtInt(m.email.leads) + ' leads (' + fmtMoney(m.email.leadInv) + ')' : '') +
+    (m.email.fee > 0 ? ' · Fee ' + fmtMoney(m.email.fee) : '') + ' · CTR ' + fmtPct(m.email.ctr,2) + ' · CVR ' + fmtPct(m.email.cvr,2) + ' · Ticket ' + fmtMoney(m.email.aov) + ' · Automations ' + fmtMoney(m.email.auto) + '</b>');
+  if (m.orgGoal > 0) parts.push('Orgánico: <b>' + fmtDec(m.pctOrg,0) + '% del objetivo</b>');
   document.getElementById('printAssumptions').innerHTML = parts.join(' · ');
 }
 
@@ -757,11 +975,11 @@ function renderBrand(m) {
   }).join('');
   const totBudget = brands.reduce((a,b) => a + (+b.budget||0), 0);
   const totImpr = brands.reduce((a,b) => { const c = +b.cpm||0, bu = +b.budget||0; return a + (c > 0 ? bu/c*1000 : 0); }, 0);
-  const perfInv = m ? m.inv : 0;
+  const perfInv = m ? m.inv + (m.email ? m.email.leadInv : 0) : 0;
   foot.innerHTML =
     '<tr><td>TOTAL BRANDING</td><td></td><td></td><td class="num" style="color:var(--ke-orange)">' + fmtMoney(totBudget) +
     '</td><td class="num">' + fmtMoney(totBudget / days) + '</td><td class="num"></td><td class="num">' + fmtInt(totImpr) + '</td><td class="no-print"></td></tr>' +
-    '<tr><td style="color:var(--ke-text)">TOTAL MES (perf. + branding)</td><td></td><td></td><td class="num" style="color:var(--ke-red)">' + fmtMoney(perfInv + totBudget) +
+    '<tr><td style="color:var(--ke-text)">TOTAL MES (perf. + ' + (m && m.email && m.email.leadInv > 0 ? 'leads + ' : '') + 'branding)</td><td></td><td></td><td class="num" style="color:var(--ke-red)">' + fmtMoney(perfInv + totBudget) +
     '</td><td class="num">' + fmtMoney((perfInv + totBudget) / days) + '</td><td class="num"></td><td class="num"></td><td class="no-print"></td></tr>';
 }
 
