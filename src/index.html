@@ -443,7 +443,7 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
       <div class="ke-kc"><div class="ke-kl">CPA proyectado</div><div class="ke-kv w" id="kCpa">—</div><div class="ke-ks">Inversión ÷ conversiones</div></div>
       <div class="ke-kc"><div class="ke-kl">ACOS proyectado</div><div class="ke-kv" id="kAcos">—</div><div class="ke-ks" id="kAcosS">—</div></div>
       <div class="ke-kc g"><div class="ke-kl">ROAS proyectado</div><div class="ke-kv g" id="kRoas">—</div><div class="ke-ks">Facturación ÷ inversión</div></div>
-      <div class="ke-kc p"><div class="ke-kl">Sesiones proy.</div><div class="ke-kv" id="kSes" style="color:var(--ke-purple)">—</div><div class="ke-ks" id="kSesS">—</div></div>
+      <div class="ke-kc p"><div class="ke-kl" id="kSesL">Sesiones proy.</div><div class="ke-kv" id="kSes" style="color:var(--ke-purple)">—</div><div class="ke-ks" id="kSesS">—</div></div>
     </div>
 
     <div class="ke-block">
@@ -730,7 +730,9 @@ function render() {
   // Sesiones ≈ clicks que llegan al sitio (la tasa de conversión de GA4 es por sesión)
   const ses = m.clicks + (m.email ? m.email.clicks : 0);
   set('kSes', fmtInt(ses));
-  set('kSesS', m.email ? 'Pauta ' + fmtInt(m.clicks) + ' · Email ' + fmtInt(m.email.clicks) : 'Clicks de pauta al sitio');
+  set('kSesL', m.email ? 'Sesiones proy. · Pauta + Email' : 'Sesiones proy. · Pauta');
+  document.getElementById('kSesS').innerHTML = (m.email ? 'Pauta ' + fmtInt(m.clicks) + ' · Email ' + fmtInt(m.email.clicks) : 'Clicks de pauta al sitio') +
+    '<br>No incluye tráfico orgánico ni directo';
 
   renderStatus(m);
   renderChannels(m);
