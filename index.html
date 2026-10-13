@@ -728,6 +728,58 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
         </div>
       </div>
 
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">6 · Resto del mes</span>
+        <span id="evRestoWindowChip"></span>
+      </div>
+      <div class="ke-grid-4">
+        <div class="field">
+          <label>Inicio resto del mes</label>
+          <div class="in"><input type="date" id="evRestoInicio"></div>
+          <div class="hint">Auto: día siguiente al fin del evento.</div>
+        </div>
+        <div class="field">
+          <label>Fin resto del mes</label>
+          <div class="in"><input type="date" id="evRestoFin"></div>
+          <div class="hint">Auto: último día del mes · <a href="#" onclick="evRestoAuto(true);return false" style="color:var(--ke-orange);text-decoration:none">↻ recalcular</a></div>
+        </div>
+        <div class="field">
+          <label>Objetivo de facturación · resto</label>
+          <div class="in"><span class="pre">$</span><input type="number" id="evRestoObj" min="0" step="1" placeholder="0"></div>
+          <div class="hint">Facturación esperada en los días fuera del evento.</div>
+        </div>
+        <div class="field">
+          <label>ACOS límite · resto</label>
+          <div class="in"><input type="number" id="evRestoAcos" min="0.1" max="100" step="0.1" placeholder="10"><span class="suf">%</span></div>
+          <div class="hint">ACOS objetivo propio del resto del mes.</div>
+        </div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">7 · Distribución por plataforma · Resto del mes</span>
+        <span id="evRestoDistChip"></span>
+      </div>
+      <div class="ke-grid-4">
+        <div class="field">
+          <label>Meta Ads</label>
+          <div class="in"><input type="number" id="evRestoDistMeta" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>Google Ads</label>
+          <div class="in"><input type="number" id="evRestoDistGoogle" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>TikTok Ads</label>
+          <div class="in"><input type="number" id="evRestoDistTiktok" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>Pinterest Ads</label>
+          <div class="in"><input type="number" id="evRestoDistPinterest" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+      </div>
+
     </div><!-- /eventoForm -->
 
     <!-- ===== EVENT RESULTS ===== -->
@@ -801,6 +853,44 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
           <tbody id="evPlatBody"></tbody>
           <tfoot id="evPlatFoot"></tfoot>
         </table></div>
+      </div>
+
+      <!-- ===== RESTO DEL MES ===== -->
+      <div id="evRestoResults" style="display:none">
+        <div class="ke-sec-head" style="margin-top:28px">
+          <div class="ke-sec-line"></div>
+          <span class="ke-sec-label">9 · Proyección · Resto del mes</span>
+          <span id="evRestoRangeChip"></span>
+        </div>
+        <div class="ke-grid-4">
+          <div class="ke-kc"><div class="ke-kl">Inversión · resto</div><div class="ke-kv" id="evRkInv">—</div><div class="ke-ks" id="evRkInvS">—</div></div>
+          <div class="ke-kc o"><div class="ke-kl">Facturación · resto</div><div class="ke-kv o" id="evRkObj">—</div><div class="ke-ks">Objetivo del resto del mes</div></div>
+          <div class="ke-kc"><div class="ke-kl">ACOS límite · resto</div><div class="ke-kv w" id="evRkAcos">—</div><div class="ke-ks">Igual para todo el período</div></div>
+          <div class="ke-kc g"><div class="ke-kl">ROAS · resto</div><div class="ke-kv g" id="evRkRoas">—</div><div class="ke-ks">Facturación ÷ inversión</div></div>
+        </div>
+        <div class="ke-block" style="margin-top:16px">
+          <div class="ke-block-top"></div>
+          <div class="ke-bh"><span class="ke-bt">Resumen por plataforma · Resto del mes</span><span class="ke-bt" id="evRestoMonth"></span></div>
+          <div class="tbl-scroll"><table class="ke-t">
+            <thead><tr><th>Plataforma</th><th class="num">%</th><th class="num">Inv. diaria</th><th class="num acc">Inversión</th><th class="num">Facturación</th></tr></thead>
+            <tbody id="evRestoPlatBody"></tbody>
+            <tfoot id="evRestoPlatFoot"></tfoot>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- ===== TOTAL DEL MES ===== -->
+      <div id="evTotalResults" style="display:none">
+        <div class="ke-sec-head" style="margin-top:28px">
+          <div class="ke-sec-line"></div>
+          <span class="ke-sec-label">10 · Total del mes · Evento + Resto</span>
+        </div>
+        <div class="ke-grid-4">
+          <div class="ke-kc"><div class="ke-kl">Inversión total del mes</div><div class="ke-kv" id="evTkInv">—</div><div class="ke-ks" id="evTkInvS">—</div></div>
+          <div class="ke-kc o"><div class="ke-kl">Facturación total del mes</div><div class="ke-kv o" id="evTkObj">—</div><div class="ke-ks" id="evTkObjS">—</div></div>
+          <div class="ke-kc"><div class="ke-kl">ACOS combinado</div><div class="ke-kv w" id="evTkAcos">—</div><div class="ke-ks">Inversión total ÷ facturación total</div></div>
+          <div class="ke-kc g"><div class="ke-kl">ROAS del mes</div><div class="ke-kv g" id="evTkRoas">—</div><div class="ke-ks" id="evTkRoasS">—</div></div>
+        </div>
       </div>
 
       <div class="ke-footer">
@@ -1394,13 +1484,15 @@ function setDefaultMonth() {
 let mode = 'mensual';
 const EV_F = ['evCliente','evEvento','evAutor','evInicio','evFinCore','evFinExt',
   'evMesNormal','evPct','evCoreShare','evAcos',
-  'evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest'];
+  'evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest',
+  'evRestoInicio','evRestoFin','evRestoObj','evRestoAcos',
+  'evRestoDistMeta','evRestoDistGoogle','evRestoDistTiktok','evRestoDistPinterest'];
 // Paleta de plataformas validada para fondo oscuro (CVD + separación a vista normal)
 const EV_CH = [
-  { key:'meta',      label:'Meta Ads',      dist:'evDistMeta',      color:'#4fa3ff' },
-  { key:'google',    label:'Google Ads',    dist:'evDistGoogle',    color:'#4dcc80' },
-  { key:'tiktok',    label:'TikTok Ads',    dist:'evDistTiktok',    color:'#c084fc' },
-  { key:'pinterest', label:'Pinterest Ads', dist:'evDistPinterest', color:'#ff700a' },
+  { key:'meta',      label:'Meta Ads',      dist:'evDistMeta',      distResto:'evRestoDistMeta',      color:'#4fa3ff' },
+  { key:'google',    label:'Google Ads',    dist:'evDistGoogle',    distResto:'evRestoDistGoogle',    color:'#4dcc80' },
+  { key:'tiktok',    label:'TikTok Ads',    dist:'evDistTiktok',    distResto:'evRestoDistTiktok',    color:'#c084fc' },
+  { key:'pinterest', label:'Pinterest Ads', dist:'evDistPinterest', distResto:'evRestoDistPinterest', color:'#ff700a' },
 ];
 const DAY_MS = 86400000;
 const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
@@ -1487,6 +1579,7 @@ function evRenderWindowChip() {
 
 function evRender() {
   evRenderDistChip(); evRenderObjAuto(); evRenderWindowChip();
+  evRenderRestoDistChip(); evRenderRestoWindowChip();
   const m = evCompute();
   document.getElementById('eventoResults').style.display = m ? '' : 'none';
   document.getElementById('eventoEmpty').style.display = m ? 'none' : '';
@@ -1522,6 +1615,13 @@ function evRender() {
   evHtml('evChartAcosNote', 'ACOS límite del evento: ' + fmtPct(m.acos,1) + ', igual para los días núcleo y de extensión.');
 
   evRenderDayTable(m); evRenderPlatTable(m);
+
+  // Resto del mes + Total del mes (evento + resto)
+  const r = evRestoCompute();
+  document.getElementById('evRestoResults').style.display = r ? '' : 'none';
+  document.getElementById('evTotalResults').style.display = r ? '' : 'none';
+  if (r) { evRenderResto(r); evRenderTotal(m, r); }
+
   document.getElementById('evFooterLine').textContent =
     'Plan de evento · ' + ev + (cli ? ' · ' + cli : '') + ' · ' + rangeTxt + (autor ? ' · ' + autor : '') + ' · Krab-e';
   evBindTips('evChartInv'); evBindTips('evChartRev'); evBindTips('evChartAcos');
@@ -1632,6 +1732,63 @@ function evRenderPlatTable(m) {
     '<tr><td><strong>Total</strong></td><td class="num">100%</td><td class="num"><strong>' + fmtMoney(m.invCore) + '</strong></td><td class="num"><strong>' + fmtMoney(m.invExt) + '</strong></td><td class="num acc"><strong>' + fmtMoney(m.inv) + '</strong></td><td class="num"><strong>' + fmtMoney(m.objetivo) + '</strong></td></tr>';
 }
 
+/* ---- Resto del mes (días de noviembre fuera del evento) ---- */
+function evFmtISO(dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
+function evRestoAuto(force) {
+  const end = evParseDate('evFinExt') || evParseDate('evFinCore'); if (!end) return;
+  const ri = new Date(end.getTime() + DAY_MS);
+  const rf = new Date(ri.getFullYear(), ri.getMonth() + 1, 0);
+  const iEl = document.getElementById('evRestoInicio'), fEl = document.getElementById('evRestoFin');
+  if (force || !iEl.value) iEl.value = evFmtISO(ri);
+  if (force || !fEl.value) fEl.value = evFmtISO(rf);
+  if (force) evRender();
+}
+function evRestoCompute() {
+  const ri = evParseDate('evRestoInicio'), rf = evParseDate('evRestoFin');
+  const obj = val('evRestoObj'), acos = val('evRestoAcos');
+  const dist = {}; let distSum = 0;
+  EV_CH.forEach(c => { const d = val(c.distResto); dist[c.key] = (isFinite(d) && d > 0) ? d : 0; distSum += dist[c.key]; });
+  const active = EV_CH.filter(c => dist[c.key] > 0);
+  if (!ri || !rf || ri > rf) return null;
+  if (!(isFinite(obj) && obj > 0 && isFinite(acos) && acos > 0 && acos <= 100 && Math.round(distSum) === 100)) return null;
+  const nDays = evDaysInc(ri, rf);
+  const inv = obj * acos / 100;
+  return { ri, rf, nDays, obj, acos, inv, daily: inv / nDays, roas: obj / inv, dist, active };
+}
+function evRenderRestoDistChip() {
+  let sum = 0; EV_CH.forEach(c => { const d = val(c.distResto); if (isFinite(d)) sum += d; });
+  const ok = Math.round(sum) === 100;
+  evHtml('evRestoDistChip', '<span class="ke-chip ' + (ok ? 'ke-c-ok' : 'ke-c-danger') + '">Suma ' + fmtDec(sum,0) + '%' + (ok ? '' : ' · debe ser 100%') + '</span>');
+}
+function evRenderRestoWindowChip() {
+  const ri = evParseDate('evRestoInicio'), rf = evParseDate('evRestoFin');
+  if (!ri || !rf || ri > rf) { evHtml('evRestoWindowChip', ''); return; }
+  evHtml('evRestoWindowChip', '<span class="ke-chip ke-c-neutral">' + evDaysInc(ri, rf) + ' días</span>');
+}
+function evRenderResto(r) {
+  evSet('evRkInv', fmtMoney(r.inv)); evHtml('evRkInvS', r.nDays + ' días · ' + fmtMoney(r.daily) + '/día');
+  evSet('evRkObj', fmtMoney(r.obj));
+  evSet('evRkAcos', fmtPct(r.acos));
+  evSet('evRkRoas', fmtDec(r.roas,2) + 'x');
+  evSet('evRestoMonth', evFmtDate(r.ri) + ' – ' + evFmtDate(r.rf));
+  evHtml('evRestoRangeChip', '<span class="ke-chip ke-c-accent">' + r.nDays + ' días fuera del evento</span>');
+  const ac = r.acos / 100;
+  document.getElementById('evRestoPlatBody').innerHTML = r.active.map(c => {
+    const dp = r.dist[c.key], inv = r.inv * dp / 100, f = inv / ac, daily = inv / r.nDays;
+    return '<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + c.color + ';margin-right:7px"></span><strong>' + c.label + '</strong></td>' +
+      '<td class="num">' + fmtDec(dp,0) + '%</td><td class="num">' + fmtMoney(daily) + '</td><td class="num acc">' + fmtMoney(inv) + '</td><td class="num">' + fmtMoney(f) + '</td></tr>';
+  }).join('');
+  document.getElementById('evRestoPlatFoot').innerHTML =
+    '<tr><td><strong>Total</strong></td><td class="num">100%</td><td class="num"><strong>' + fmtMoney(r.inv / r.nDays) + '</strong></td><td class="num acc"><strong>' + fmtMoney(r.inv) + '</strong></td><td class="num"><strong>' + fmtMoney(r.obj) + '</strong></td></tr>';
+}
+function evRenderTotal(m, r) {
+  const invT = m.inv + r.inv, factT = m.objetivo + r.obj, acosT = invT / factT * 100, roasT = factT / invT;
+  evSet('evTkInv', fmtMoney(invT)); evHtml('evTkInvS', 'Evento ' + fmtMoney(m.inv) + ' · Resto ' + fmtMoney(r.inv));
+  evSet('evTkObj', fmtMoney(factT)); evHtml('evTkObjS', 'Evento ' + fmtMoney(m.objetivo) + ' · Resto ' + fmtMoney(r.obj));
+  evSet('evTkAcos', fmtPct(acosT));
+  evSet('evTkRoas', fmtDec(roasT,2) + 'x'); evHtml('evTkRoasS', (m.nTotal + r.nDays) + ' días en total');
+}
+
 /* ---- Hover tooltip ---- */
 let evTipEl = null;
 function evTip() { if (!evTipEl) { evTipEl = document.createElement('div'); evTipEl.className = 'ev-tip'; document.body.appendChild(evTipEl); } return evTipEl; }
@@ -1660,6 +1817,11 @@ function evApplyDefaults() {
   if (['evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest'].every(id => document.getElementById(id).value === '')) {
     document.getElementById('evDistMeta').value = 60; document.getElementById('evDistGoogle').value = 40;
   }
+  set('evRestoAcos', '10');
+  if (['evRestoDistMeta','evRestoDistGoogle','evRestoDistTiktok','evRestoDistPinterest'].every(id => document.getElementById(id).value === '')) {
+    document.getElementById('evRestoDistMeta').value = 60; document.getElementById('evRestoDistGoogle').value = 40;
+  }
+  evRestoAuto(false);
 }
 
 /* ================= MODE SWITCH ================= */
