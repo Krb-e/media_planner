@@ -175,6 +175,25 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
 .btn-del { background:none; border:none; color:var(--ke-muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:4px; }
 .btn-del:hover { color:var(--ke-bad); background:rgba(224,90,58,.1); }
 
+/* ===== MODE TABS ===== */
+.ke-tabs { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 28px; border-bottom:1px solid var(--ke-border); }
+.ke-tab { font-family:'General Sans',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; padding:12px 16px; background:none; border:none; border-bottom:2px solid transparent; color:var(--ke-muted); transition:color .15s,border-color .15s; margin-bottom:-1px; }
+.ke-tab:hover { color:var(--ke-text); }
+.ke-tab.active { color:var(--ke-orange); border-bottom-color:var(--ke-orange); }
+input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; font-size:15px; font-weight:500; background:transparent; border:none; outline:none; color:var(--ke-text); width:100%; }
+
+/* ===== CHARTS (event view) ===== */
+.ev-chart { width:100%; display:block; height:auto; }
+.ev-chart text { font-family:'General Sans',sans-serif; }
+.ev-legend { display:flex; flex-wrap:wrap; gap:16px; padding:14px 18px; border-top:1px solid var(--ke-border); }
+.ev-leg { display:inline-flex; align-items:center; gap:7px; font-size:11px; color:var(--ke-muted); }
+.ev-leg i { width:11px; height:11px; border-radius:3px; display:inline-block; }
+.ev-note { padding:0 18px 16px; font-size:11px; color:var(--ke-muted); line-height:1.6; }
+.ev-tip { position:fixed; z-index:60; pointer-events:none; background:#111; border:1px solid var(--ke-border); border-radius:8px; padding:8px 11px; font-size:11px; line-height:1.5; color:var(--ke-text); box-shadow:0 10px 30px rgba(0,0,0,.45); opacity:0; transition:opacity .1s; max-width:240px; }
+.ev-tip.on { opacity:1; }
+.ev-tip b { color:var(--ke-orange); font-weight:600; }
+.ev-tip .muted { color:var(--ke-muted); }
+
 /* ===== FOOTER ===== */
 .ke-footer { padding:28px 48px; border-top:1px solid var(--ke-border); display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--ke-muted); letter-spacing:.12em; text-transform:uppercase; }
 
@@ -183,7 +202,7 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
 @media print {
   @page { size:A4 landscape; margin:0; }
   body::after { display:none; }
-  .no-print, .ke-nav, #formSection { display:none !important; }
+  .no-print, .ke-nav, #formSection, #eventoForm { display:none !important; }
   .print-only { display:block; }
   .wrap { padding:10mm 12mm; max-width:none; } .ke-block, .ke-kc, .ke-alert, tr { page-break-inside:avoid; }
   .ke-sec-head { margin-top:20px; }
@@ -222,9 +241,17 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
     </div>
     <div class="ke-pg-stat">
       <div class="ke-pg-stat-val" id="hdrInv">—</div>
-      <div class="ke-pg-stat-lbl">Inversión total del mes</div>
+      <div class="ke-pg-stat-lbl" id="hdrInvLbl">Inversión total del mes</div>
     </div>
   </div>
+
+  <!-- ============ MODE TABS ============ -->
+  <div class="ke-tabs no-print">
+    <button type="button" class="ke-tab active" id="tabMensual" onclick="switchMode('mensual')">Plan mensual</button>
+    <button type="button" class="ke-tab" id="tabEvento" onclick="switchMode('evento')">Plan de evento · Cyber / Hot Sale</button>
+  </div>
+
+  <div id="viewMensual">
 
   <!-- ============ FORM ============ -->
   <div id="formSection">
@@ -554,6 +581,209 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
   <div id="emptyState" class="ke-alert ke-a-warn" style="margin-top:24px">
     <p><strong>Completá los campos de arriba para generar la proyección.</strong> Necesitás: facturación objetivo, ACOS límite, una distribución por canal que sume 100%, las métricas de cada canal activo (CPM + CTR en Meta / TikTok / Pinterest, CPC en Google), tasa de conversión y ticket promedio. Si asignás un % del objetivo a Email, completá también la sección de email marketing.</p>
   </div>
+
+  </div><!-- /viewMensual -->
+
+  <!-- ============ EVENT VIEW ============ -->
+  <div id="viewEvento" style="display:none">
+
+    <div id="eventoForm">
+
+      <div class="ke-sec-head">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">1 · Datos del evento</span>
+      </div>
+      <div class="ke-grid-3">
+        <div class="field">
+          <label>Cliente / Seller</label>
+          <div class="in"><input type="text" id="evCliente" placeholder="Nombre del seller"></div>
+        </div>
+        <div class="field">
+          <label>Evento</label>
+          <div class="in"><input type="text" id="evEvento" placeholder="Cyber Monday" list="evEventList"></div>
+          <datalist id="evEventList"><option value="Cyber Monday"><option value="Hot Sale"><option value="Black Friday"></datalist>
+        </div>
+        <div class="field">
+          <label>Autor</label>
+          <div class="in"><input type="text" id="evAutor" placeholder="Paid Media"></div>
+        </div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">2 · Ventana del evento</span>
+        <span id="evWindowChip"></span>
+      </div>
+      <div class="ke-grid-3">
+        <div class="field">
+          <label>Inicio del evento</label>
+          <div class="in"><input type="date" id="evInicio"></div>
+          <div class="hint">Libre por seller: algunos arrancan 2–3 días antes.</div>
+        </div>
+        <div class="field">
+          <label>Último día núcleo (core)</label>
+          <div class="in"><input type="date" id="evFinCore"></div>
+          <div class="hint">Días de pico del evento (ej. Cyber: 2, 3 y 4).</div>
+        </div>
+        <div class="field">
+          <label>Fin de la extensión</label>
+          <div class="in"><input type="date" id="evFinExt"></div>
+          <div class="hint">Cyber Week: hasta el 8 o 9. Dejar igual al núcleo si no hay extensión.</div>
+        </div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">3 · Objetivo de facturación</span>
+      </div>
+      <div class="ke-grid-4">
+        <div class="field">
+          <label>Facturación de un mes normal</label>
+          <div class="in"><span class="pre">$</span><input type="number" id="evMesNormal" min="0" step="1" placeholder="0"></div>
+        </div>
+        <div class="field">
+          <label>% del mes normal en el evento</label>
+          <div class="in"><input type="number" id="evPct" min="0" max="200" step="1" placeholder="85"><span class="suf">%</span></div>
+          <div class="hint">En estos eventos un seller suele facturar 70–100% de un mes.</div>
+        </div>
+        <div class="field">
+          <label>Objetivo del evento</label>
+          <div class="auto" id="evObjAuto">—</div>
+          <div class="hint">Facturación normal × % del mes.</div>
+        </div>
+        <div class="field">
+          <label>% de inversión en días núcleo</label>
+          <div class="in"><input type="number" id="evCoreShare" min="0" max="100" step="1" placeholder="65"><span class="suf">%</span></div>
+          <div class="hint">El resto se reparte en la extensión.</div>
+        </div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">4 · ACOS objetivo por fase</span>
+      </div>
+      <div class="ke-grid-2">
+        <div class="field">
+          <label>ACOS días núcleo (core)</label>
+          <div class="in"><input type="number" id="evAcosCore" min="0.1" max="100" step="0.1" placeholder="8"><span class="suf">%</span></div>
+          <div class="hint">Suelen ser los días de mejor ACOS: por eso conviene subir inversión.</div>
+        </div>
+        <div class="field">
+          <label>ACOS días de extensión</label>
+          <div class="in"><input type="number" id="evAcosExt" min="0.1" max="100" step="0.1" placeholder="14"><span class="suf">%</span></div>
+          <div class="hint">Post-pico: el ACOS suele subir (menos eficiente).</div>
+        </div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">5 · Distribución del presupuesto por plataforma</span>
+        <span id="evDistChip"></span>
+      </div>
+      <div class="ke-grid-4">
+        <div class="field">
+          <label>Meta Ads</label>
+          <div class="in"><input type="number" id="evDistMeta" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>Google Ads</label>
+          <div class="in"><input type="number" id="evDistGoogle" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>TikTok Ads</label>
+          <div class="in"><input type="number" id="evDistTiktok" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+        <div class="field">
+          <label>Pinterest Ads</label>
+          <div class="in"><input type="number" id="evDistPinterest" min="0" max="100" step="1" placeholder="0"><span class="suf">%</span></div>
+        </div>
+      </div>
+
+    </div><!-- /eventoForm -->
+
+    <!-- ===== EVENT RESULTS ===== -->
+    <div id="eventoResults" style="display:none">
+
+      <div class="ke-sec-head" style="margin-top:8px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">6 · Proyección del evento</span>
+        <span id="evStatusChip"></span>
+      </div>
+
+      <div class="ke-grid-4" style="margin-bottom:16px">
+        <div class="ke-kc"><div class="ke-kl">Inversión total</div><div class="ke-kv" id="evkInv">—</div><div class="ke-ks" id="evkInvS">—</div></div>
+        <div class="ke-kc o"><div class="ke-kl">Facturación objetivo</div><div class="ke-kv o" id="evkObj">—</div><div class="ke-ks" id="evkObjS">—</div></div>
+        <div class="ke-kc"><div class="ke-kl">ACOS promedio</div><div class="ke-kv w" id="evkAcos">—</div><div class="ke-ks" id="evkAcosS">—</div></div>
+        <div class="ke-kc g"><div class="ke-kl">ROAS proyectado</div><div class="ke-kv g" id="evkRoas">—</div><div class="ke-ks">Facturación ÷ inversión</div></div>
+      </div>
+      <div class="ke-grid-4">
+        <div class="ke-kc b"><div class="ke-kl">Inversión · núcleo</div><div class="ke-kv b" id="evkInvCore">—</div><div class="ke-ks" id="evkInvCoreS">—</div></div>
+        <div class="ke-kc p"><div class="ke-kl">Inversión · extensión</div><div class="ke-kv p" id="evkInvExt">—</div><div class="ke-ks" id="evkInvExtS">—</div></div>
+        <div class="ke-kc b"><div class="ke-kl">Facturación · núcleo</div><div class="ke-kv b" id="evkFactCore">—</div><div class="ke-ks" id="evkFactCoreS">—</div></div>
+        <div class="ke-kc p"><div class="ke-kl">Facturación · extensión</div><div class="ke-kv p" id="evkFactExt">—</div><div class="ke-ks" id="evkFactExtS">—</div></div>
+      </div>
+
+      <div class="ke-block" style="margin-top:16px">
+        <div class="ke-block-top"></div>
+        <div class="ke-bh"><span class="ke-bt">Inversión diaria por plataforma</span><span class="ke-bt" id="evChartInvMonth"></span></div>
+        <div id="evChartInv"></div>
+        <div class="ev-legend" id="evChartInvLeg"></div>
+        <div class="ev-note" id="evChartInvNote"></div>
+      </div>
+
+      <div class="ke-block">
+        <div class="ke-block-top"></div>
+        <div class="ke-bh"><span class="ke-bt">Facturación proyectada acumulada</span><span class="ke-bt" id="evChartRevMonth"></span></div>
+        <div id="evChartRev"></div>
+        <div class="ev-note" id="evChartRevNote"></div>
+      </div>
+
+      <div class="ke-block">
+        <div class="ke-block-top"></div>
+        <div class="ke-bh"><span class="ke-bt">ACOS proyectado por día</span><span class="ke-bt">Núcleo vs extensión</span></div>
+        <div id="evChartAcos"></div>
+        <div class="ev-note" id="evChartAcosNote"></div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">7 · Detalle día a día</span>
+      </div>
+      <div class="ke-block">
+        <div class="ke-block-top"></div>
+        <div class="tbl-scroll"><table class="ke-t">
+          <thead id="evDayHead"></thead>
+          <tbody id="evDayBody"></tbody>
+          <tfoot id="evDayFoot"></tfoot>
+        </table></div>
+      </div>
+
+      <div class="ke-sec-head" style="margin-top:28px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">8 · Resumen por plataforma</span>
+      </div>
+      <div class="ke-block">
+        <div class="ke-block-top"></div>
+        <div class="tbl-scroll"><table class="ke-t">
+          <thead><tr>
+            <th>Plataforma</th><th class="num">%</th><th class="num">Inv. núcleo</th>
+            <th class="num">Inv. extensión</th><th class="num acc">Inv. total</th><th class="num">Facturación</th>
+          </tr></thead>
+          <tbody id="evPlatBody"></tbody>
+          <tfoot id="evPlatFoot"></tfoot>
+        </table></div>
+      </div>
+
+      <div class="ke-footer">
+        <div id="evFooterLine">Plan de evento · Krab-e</div>
+      </div>
+    </div><!-- /eventoResults -->
+
+    <div id="eventoEmpty" class="ke-alert ke-a-warn" style="margin-top:24px">
+      <p><strong>Completá los datos del evento para generar la proyección.</strong> Necesitás: la ventana (inicio, último día núcleo y fin de la extensión), la facturación de un mes normal y el % que representa el evento, el % de inversión que va a los días núcleo, el ACOS objetivo de cada fase y una distribución por plataforma que sume 100%.</p>
+    </div>
+
+  </div><!-- /viewEvento -->
 
 </div>
 
@@ -1014,6 +1244,13 @@ function applyDefaults() {
   if (!anySet) { document.getElementById('distMeta').value = 60; document.getElementById('distGoogle').value = 40; }
 }
 function resetAll() {
+  if (mode === 'evento') {
+    if (!confirm('¿Empezar un plan de evento nuevo? Se borran los datos cargados.')) return;
+    try { localStorage.removeItem('krabe-mediaplan-ev'); } catch(e) {}
+    EV_F.forEach(id => document.getElementById(id).value = '');
+    evApplyDefaults(); evRender();
+    return;
+  }
   if (!confirm('¿Empezar un plan nuevo? Se borran los datos cargados.')) return;
   try { localStorage.removeItem('krabe-mediaplan'); } catch(e) {}
   F.forEach(id => document.getElementById(id).value = '');
@@ -1024,6 +1261,16 @@ function resetAll() {
   setDefaultMonth(); render();
 }
 function exportPDF() {
+  if (mode === 'evento') {
+    if (!evCompute()) { alert('Completá los datos del evento antes de exportar.'); return; }
+    const cli = document.getElementById('evCliente').value.trim() || 'Seller';
+    const ev = document.getElementById('evEvento').value.trim() || 'Evento';
+    const prev = document.title;
+    document.title = 'Plan ' + ev + ' - ' + cli + ' - Krab-e';
+    window.print();
+    document.title = prev;
+    return;
+  }
   if (!compute()) { alert('Completá las métricas antes de exportar.'); return; }
   const cliente = document.getElementById('cliente').value.trim() || 'Cliente';
   const mes = monthName(document.getElementById('mes').value) || '';
@@ -1051,9 +1298,303 @@ function setDefaultMonth() {
   } catch(e) {}
 })();
 
+/* ================= EVENT MODEL (Cyber / Hot Sale / Black Friday) ================= */
+let mode = 'mensual';
+const EV_F = ['evCliente','evEvento','evAutor','evInicio','evFinCore','evFinExt',
+  'evMesNormal','evPct','evCoreShare','evAcosCore','evAcosExt',
+  'evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest'];
+// Paleta de plataformas validada para fondo oscuro (CVD + separación a vista normal)
+const EV_CH = [
+  { key:'meta',      label:'Meta Ads',      dist:'evDistMeta',      color:'#4fa3ff' },
+  { key:'google',    label:'Google Ads',    dist:'evDistGoogle',    color:'#4dcc80' },
+  { key:'tiktok',    label:'TikTok Ads',    dist:'evDistTiktok',    color:'#c084fc' },
+  { key:'pinterest', label:'Pinterest Ads', dist:'evDistPinterest', color:'#ff700a' },
+];
+const DAY_MS = 86400000;
+const MON = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+function evParseDate(id) { const v = document.getElementById(id).value; if (!v) return null; const p = v.split('-').map(Number); const dt = new Date(p[0], p[1]-1, p[2]); return isNaN(dt.getTime()) ? null : dt; }
+function evFmtDate(dt) { return dt.getDate() + ' ' + MON[dt.getMonth()]; }
+function evDaysInc(a, b) { return Math.round((b - a) / DAY_MS) + 1; }
+const fmtMoneyShort = n => {
+  if (!isFinite(n)) return '—';
+  const a = Math.abs(n);
+  if (a >= 1e6) return '$ ' + fmtDec(n/1e6, n % 1e6 === 0 ? 0 : 1) + 'M';
+  if (a >= 1e3) return '$ ' + Math.round(n/1e3) + 'k';
+  return '$ ' + Math.round(n);
+};
+
+function evCompute() {
+  const start = evParseDate('evInicio'), coreEnd = evParseDate('evFinCore');
+  let extEnd = evParseDate('evFinExt');
+  const mesNormal = val('evMesNormal'), pct = val('evPct');
+  const coreShare = val('evCoreShare'), acosCore = val('evAcosCore'), acosExt = val('evAcosExt');
+
+  const dist = {}; let distSum = 0;
+  EV_CH.forEach(c => { const d = val(c.dist); dist[c.key] = (isFinite(d) && d > 0) ? d : 0; distSum += dist[c.key]; });
+  const active = EV_CH.filter(c => dist[c.key] > 0);
+
+  if (!start || !coreEnd || start > coreEnd) return null;
+  if (!extEnd || extEnd < coreEnd) extEnd = coreEnd;
+  const nCore = evDaysInc(start, coreEnd);
+  const nExt = Math.round((extEnd - coreEnd) / DAY_MS);
+  const nTotal = nCore + nExt;
+
+  const objetivo = (isFinite(mesNormal) && mesNormal > 0 && isFinite(pct) && pct > 0) ? mesNormal * pct / 100 : NaN;
+  const sRaw = (isFinite(coreShare) && coreShare >= 0 && coreShare <= 100) ? coreShare / 100 : NaN;
+  const s = nExt === 0 ? 1 : sRaw;
+  const okBase = isFinite(objetivo) && objetivo > 0 && isFinite(acosCore) && acosCore > 0 &&
+    (nExt === 0 || (isFinite(acosExt) && acosExt > 0)) && isFinite(s);
+  if (!(okBase && Math.round(distSum) === 100)) return null;
+
+  // Concentración sobre inversión; objetivo de facturación fija la inversión total.
+  const acosC = acosCore / 100, acosE = acosExt / 100;
+  const denom = s / acosC + (nExt > 0 ? (1 - s) / acosE : 0);
+  const inv = objetivo / denom;
+  const invCore = inv * s, invExt = inv * (1 - s);
+  const dInvCore = invCore / nCore;
+  const dInvExt = nExt > 0 ? invExt / nExt : 0;
+  const factCore = invCore / acosC;
+  const factExt = nExt > 0 ? invExt / acosE : 0;
+
+  const days = [];
+  for (let i = 0; i < nTotal; i++) {
+    const dt = new Date(start.getTime() + i * DAY_MS);
+    const core = i < nCore;
+    const dInv = core ? dInvCore : dInvExt;
+    const acos = core ? acosCore : acosExt;
+    const fact = dInv / (acos / 100);
+    const plats = active.map(c => ({ key:c.key, color:c.color, label:c.label, inv: dInv * dist[c.key] / 100 }));
+    days.push({ dt, core, inv:dInv, acos, fact, plats });
+  }
+  let acc = 0; days.forEach(d => { acc += d.fact; d.cum = acc; });
+  const factCoreCum = days[nCore - 1].cum;
+
+  return { start, coreEnd, extEnd, nCore, nExt, nTotal, objetivo, mesNormal, pct,
+    inv, invCore, invExt, dInvCore, dInvExt, factCore, factExt, acosCore, acosExt,
+    acosBlend: inv / objetivo * 100, roas: objetivo / inv, s, dist, active, days,
+    factCoreCum, factCorePct: factCoreCum / objetivo * 100 };
+}
+
+/* ---- Event render ---- */
+function evSet(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
+function evHtml(id, v) { const el = document.getElementById(id); if (el) el.innerHTML = v; }
+
+function evRenderDistChip() {
+  let sum = 0; EV_CH.forEach(c => { const d = val(c.dist); if (isFinite(d)) sum += d; });
+  const ok = Math.round(sum) === 100;
+  evHtml('evDistChip', '<span class="ke-chip ' + (ok ? 'ke-c-ok' : 'ke-c-danger') + '">Suma ' + fmtDec(sum,0) + '%' + (ok ? '' : ' · debe ser 100%') + '</span>');
+}
+function evRenderObjAuto() {
+  const mesNormal = val('evMesNormal'), pct = val('evPct');
+  const obj = (isFinite(mesNormal) && mesNormal > 0 && isFinite(pct) && pct > 0) ? mesNormal * pct / 100 : NaN;
+  evSet('evObjAuto', isFinite(obj) ? fmtMoney(obj) : '—');
+}
+function evRenderWindowChip() {
+  const start = evParseDate('evInicio'), coreEnd = evParseDate('evFinCore'); let extEnd = evParseDate('evFinExt');
+  if (!start || !coreEnd || start > coreEnd) { evHtml('evWindowChip', ''); return; }
+  if (!extEnd || extEnd < coreEnd) extEnd = coreEnd;
+  const nCore = evDaysInc(start, coreEnd), nExt = Math.round((extEnd - coreEnd) / DAY_MS);
+  evHtml('evWindowChip', '<span class="ke-chip ke-c-neutral">' + (nCore + nExt) + ' días · ' + nCore + ' núcleo + ' + nExt + ' extensión</span>');
+}
+
+function evRender() {
+  evRenderDistChip(); evRenderObjAuto(); evRenderWindowChip();
+  const m = evCompute();
+  document.getElementById('eventoResults').style.display = m ? '' : 'none';
+  document.getElementById('eventoEmpty').style.display = m ? 'none' : '';
+  document.getElementById('hdrInv').textContent = m ? fmtMoney(m.inv) : '—';
+
+  const cli = document.getElementById('evCliente').value.trim();
+  const ev = document.getElementById('evEvento').value.trim() || 'Evento';
+  const autor = document.getElementById('evAutor').value.trim();
+  document.getElementById('subLine').textContent =
+    (cli ? cli + ' · ' : '') + ev + (m ? ' · ' + evFmtDate(m.start) + ' a ' + evFmtDate(m.days[m.nTotal-1].dt) : '') + ' · Proyección por fase';
+  if (!m) { evSave(); return; }
+
+  const rangeTxt = evFmtDate(m.start) + ' – ' + evFmtDate(m.days[m.nTotal-1].dt);
+  const short = c => c.label.replace(' Ads', '');
+  evSet('evkInv', fmtMoney(m.inv)); evSet('evkInvS', m.nTotal + ' días · ' + m.active.map(short).join(' + '));
+  evSet('evkObj', fmtMoney(m.objetivo)); evHtml('evkObjS', fmtMoney(m.mesNormal) + ' × ' + fmtDec(m.pct,0) + '% del mes');
+  evSet('evkAcos', fmtPct(m.acosBlend)); evHtml('evkAcosS', 'Núcleo ' + fmtPct(m.acosCore,1) + ' · Ext. ' + fmtPct(m.acosExt,1));
+  evSet('evkRoas', fmtDec(m.roas,2) + 'x');
+  evSet('evkInvCore', fmtMoney(m.invCore)); evHtml('evkInvCoreS', fmtDec(m.s*100,0) + '% del total · ' + fmtMoney(m.dInvCore) + '/día');
+  evSet('evkInvExt', fmtMoney(m.invExt)); evHtml('evkInvExtS', m.nExt > 0 ? (fmtDec((1-m.s)*100,0) + '% del total · ' + fmtMoney(m.dInvExt) + '/día') : 'Sin extensión');
+  evSet('evkFactCore', fmtMoney(m.factCore)); evHtml('evkFactCoreS', fmtDec(m.factCore/m.objetivo*100,0) + '% del objetivo · ' + m.nCore + ' días');
+  evSet('evkFactExt', fmtMoney(m.factExt)); evHtml('evkFactExtS', m.nExt > 0 ? (fmtDec(m.factExt/m.objetivo*100,0) + '% del objetivo · ' + m.nExt + ' días') : 'Sin extensión');
+
+  evHtml('evStatusChip', '<span class="ke-chip ke-c-accent">Núcleo concentra ' + fmtDec(m.factCorePct,0) + '% de la facturación</span>');
+
+  evSet('evChartInvMonth', rangeTxt); evSet('evChartRevMonth', rangeTxt);
+  document.getElementById('evChartInv').innerHTML = evBars(m);
+  document.getElementById('evChartInvLeg').innerHTML = m.active.map(c => '<span class="ev-leg"><i style="background:' + c.color + '"></i>' + c.label + '</span>').join('');
+  evHtml('evChartInvNote', 'Inversión diaria repartida por plataforma. Los días núcleo concentran ' + fmtDec(m.s*100,0) + '% del presupuesto (' + fmtMoney(m.dInvCore) + '/día)' + (m.nExt > 0 ? ' y la extensión el resto (' + fmtMoney(m.dInvExt) + '/día).' : '.'));
+  document.getElementById('evChartRev').innerHTML = evRevenue(m);
+  evHtml('evChartRevNote', 'La facturación acumulada llega al objetivo de ' + fmtMoney(m.objetivo) + '. Al cerrar los días núcleo ya se alcanza ' + fmtMoney(m.factCoreCum) + ' (' + fmtDec(m.factCorePct,0) + '% del objetivo).');
+  document.getElementById('evChartAcos').innerHTML = evAcosChart(m);
+  evHtml('evChartAcosNote', 'ACOS objetivo por día: ' + fmtPct(m.acosCore,1) + ' en el núcleo y ' + fmtPct(m.acosExt,1) + ' en la extensión. Promedio ponderado del evento: ' + fmtPct(m.acosBlend,1) + '.');
+
+  evRenderDayTable(m); evRenderPlatTable(m);
+  document.getElementById('evFooterLine').textContent =
+    'Plan de evento · ' + ev + (cli ? ' · ' + cli : '') + ' · ' + rangeTxt + (autor ? ' · ' + autor : '') + ' · Krab-e';
+  evBindTips('evChartInv'); evBindTips('evChartRev'); evBindTips('evChartAcos');
+  evSave();
+}
+
+/* ---- SVG charts (inline, sin dependencias) ---- */
+const EV_GRID = 'rgba(230,230,230,.08)', EV_AXIS = 'rgba(230,230,230,.18)', EV_TICK = 'rgba(230,230,230,.38)', EV_XLBL = 'rgba(230,230,230,.55)';
+function evNiceMax(v) { if (!(v > 0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); const n = v / p; const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10; return step * p; }
+function evTipEsc(h) { return h.replace(/&/g, '&amp;').replace(/"/g, '&quot;'); }
+function evDM(dt) { return dt.getDate() + '/' + (dt.getMonth() + 1); }
+
+function evBars(m) {
+  const d = m.days, n = d.length;
+  const W = 760, H = 280, padL = 58, padR = 14, padT = 16, padB = 50;
+  const pw = W - padL - padR, ph = H - padT - padB, x0 = padL, yb = padT + ph;
+  const ymax = evNiceMax(Math.max.apply(null, d.map(x => x.inv)));
+  const slot = pw / n, bw = Math.min(46, slot * 0.64);
+  const yOf = v => yb - v / ymax * ph;
+  let s = '<svg class="ev-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Inversión diaria por plataforma">';
+  const coreX1 = x0 + m.nCore * slot;
+  s += '<rect x="' + x0 + '" y="' + padT + '" width="' + (coreX1 - x0) + '" height="' + ph + '" fill="rgba(79,163,255,.05)"/>';
+  if (m.nExt > 0) s += '<rect x="' + coreX1 + '" y="' + padT + '" width="' + (x0 + pw - coreX1) + '" height="' + ph + '" fill="rgba(192,132,252,.05)"/>';
+  s += '<text x="' + (x0 + 6) + '" y="' + (padT + 12) + '" fill="rgba(79,163,255,.75)" font-size="9" font-weight="700" letter-spacing="1.5">NÚCLEO</text>';
+  if (m.nExt > 0) s += '<text x="' + (coreX1 + 6) + '" y="' + (padT + 12) + '" fill="rgba(192,132,252,.75)" font-size="9" font-weight="700" letter-spacing="1.5">EXTENSIÓN</text>';
+  for (let g = 0; g <= 4; g++) { const v = ymax * g / 4, y = yOf(v); s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + pw) + '" y2="' + y + '" stroke="' + EV_GRID + '"/>'; s += '<text x="' + (x0 - 8) + '" y="' + (y + 3) + '" fill="' + EV_TICK + '" font-size="10" text-anchor="end">' + fmtMoneyShort(v) + '</text>'; }
+  d.forEach((day, i) => {
+    const cx = x0 + slot * i + slot / 2, bx = cx - bw / 2; let acc = 0;
+    day.plats.forEach(p => {
+      if (p.inv <= 0) return;
+      const h = p.inv / ymax * ph, y = yb - acc - h, seg = Math.max(1, h - 2);
+      s += '<rect x="' + bx + '" y="' + y + '" width="' + bw + '" height="' + seg + '" rx="2" fill="' + p.color + '" data-tip="' + evTipEsc('<b>' + evFmtDate(day.dt) + '</b> · ' + (day.core ? 'núcleo' : 'extensión') + '<br>' + p.label + ': ' + fmtMoney(p.inv) + '<br>Total día: ' + fmtMoney(day.inv)) + '"/>';
+      acc += h;
+    });
+    s += '<text x="' + cx + '" y="' + (yb + 16) + '" fill="' + EV_XLBL + '" font-size="10" text-anchor="middle">' + evDM(day.dt) + '</text>';
+  });
+  s += '<line x1="' + x0 + '" y1="' + yb + '" x2="' + (x0 + pw) + '" y2="' + yb + '" stroke="' + EV_AXIS + '"/></svg>';
+  return s;
+}
+
+function evRevenue(m) {
+  const d = m.days, n = d.length;
+  const W = 760, H = 260, padL = 58, padR = 14, padT = 22, padB = 50;
+  const pw = W - padL - padR, ph = H - padT - padB, x0 = padL, yb = padT + ph;
+  const ymax = evNiceMax(m.objetivo);
+  const yOf = v => yb - v / ymax * ph;
+  const xOf = i => n > 1 ? x0 + i / (n - 1) * pw : x0 + pw / 2;
+  let s = '<svg class="ev-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Facturación proyectada acumulada">';
+  for (let g = 0; g <= 4; g++) { const v = ymax * g / 4, y = yOf(v); s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + pw) + '" y2="' + y + '" stroke="' + EV_GRID + '"/>'; s += '<text x="' + (x0 - 8) + '" y="' + (y + 3) + '" fill="' + EV_TICK + '" font-size="10" text-anchor="end">' + fmtMoneyShort(v) + '</text>'; }
+  const yObj = yOf(m.objetivo);
+  s += '<line x1="' + x0 + '" y1="' + yObj + '" x2="' + (x0 + pw) + '" y2="' + yObj + '" stroke="rgba(255,216,138,.6)" stroke-dasharray="4 4"/>';
+  s += '<text x="' + (x0 + pw) + '" y="' + (yObj - 6) + '" fill="rgba(255,216,138,.9)" font-size="10" text-anchor="end">Objetivo ' + fmtMoneyShort(m.objetivo) + '</text>';
+  if (m.nExt > 0) { const bx = xOf(m.nCore - 1); s += '<line x1="' + bx + '" y1="' + padT + '" x2="' + bx + '" y2="' + yb + '" stroke="rgba(79,163,255,.35)" stroke-dasharray="3 3"/>'; s += '<text x="' + (bx + 5) + '" y="' + (padT + 8) + '" fill="rgba(79,163,255,.8)" font-size="9" font-weight="700">FIN NÚCLEO</text>'; }
+  let line = '', area = 'M ' + x0 + ' ' + yb;
+  d.forEach((day, i) => { const X = xOf(i), Y = yOf(day.cum); line += (i ? ' L ' : 'M ') + X + ' ' + Y; area += ' L ' + X + ' ' + Y; });
+  area += ' L ' + xOf(n - 1) + ' ' + yb + ' Z';
+  s += '<path d="' + area + '" fill="rgba(77,204,128,.12)"/>';
+  s += '<path d="' + line + '" fill="none" stroke="#4dcc80" stroke-width="2"/>';
+  d.forEach((day, i) => { const X = xOf(i), Y = yOf(day.cum); s += '<circle cx="' + X + '" cy="' + Y + '" r="3.5" fill="#4dcc80"/>'; s += '<circle cx="' + X + '" cy="' + Y + '" r="11" fill="transparent" data-tip="' + evTipEsc('<b>' + evFmtDate(day.dt) + '</b><br>Acumulado: ' + fmtMoney(day.cum) + '<br>Facturación del día: ' + fmtMoney(day.fact)) + '"/>'; s += '<text x="' + X + '" y="' + (yb + 16) + '" fill="' + EV_XLBL + '" font-size="10" text-anchor="middle">' + evDM(day.dt) + '</text>'; });
+  s += '<line x1="' + x0 + '" y1="' + yb + '" x2="' + (x0 + pw) + '" y2="' + yb + '" stroke="' + EV_AXIS + '"/></svg>';
+  return s;
+}
+
+function evAcosChart(m) {
+  const d = m.days, n = d.length;
+  const W = 760, H = 240, padL = 50, padR = 14, padT = 22, padB = 50;
+  const pw = W - padL - padR, ph = H - padT - padB, x0 = padL, yb = padT + ph;
+  const ymax = evNiceMax(Math.max(m.acosExt, m.acosCore) * 1.25);
+  const yOf = v => yb - v / ymax * ph;
+  const slot = pw / n;
+  let s = '<svg class="ev-chart" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="ACOS proyectado por día">';
+  for (let g = 0; g <= 4; g++) { const v = ymax * g / 4, y = yOf(v); s += '<line x1="' + x0 + '" y1="' + y + '" x2="' + (x0 + pw) + '" y2="' + y + '" stroke="' + EV_GRID + '"/>'; s += '<text x="' + (x0 - 8) + '" y="' + (y + 3) + '" fill="' + EV_TICK + '" font-size="10" text-anchor="end">' + fmtDec(v,0) + '%</text>'; }
+  const yBl = yOf(m.acosBlend);
+  s += '<line x1="' + x0 + '" y1="' + yBl + '" x2="' + (x0 + pw) + '" y2="' + yBl + '" stroke="rgba(255,112,10,.5)" stroke-dasharray="4 4"/>';
+  s += '<text x="' + (x0 + pw) + '" y="' + (yBl - 6) + '" fill="rgba(255,112,10,.9)" font-size="10" text-anchor="end">Promedio ' + fmtPct(m.acosBlend,1) + '</text>';
+  let line = '';
+  d.forEach((day, i) => { const xA = x0 + slot * i, xB = x0 + slot * (i + 1), Y = yOf(day.acos); line += (i ? ' L ' + xA + ' ' + Y : 'M ' + xA + ' ' + Y) + ' L ' + xB + ' ' + Y; });
+  s += '<path d="' + line + '" fill="none" stroke="#e6e6e6" stroke-width="2"/>';
+  d.forEach((day, i) => { const cx = x0 + slot * i + slot / 2, Y = yOf(day.acos); s += '<circle cx="' + cx + '" cy="' + Y + '" r="3.5" fill="' + (day.core ? '#4fa3ff' : '#c084fc') + '"/>'; s += '<circle cx="' + cx + '" cy="' + Y + '" r="11" fill="transparent" data-tip="' + evTipEsc('<b>' + evFmtDate(day.dt) + '</b> · ' + (day.core ? 'núcleo' : 'extensión') + '<br>ACOS: ' + fmtPct(day.acos,1)) + '"/>'; s += '<text x="' + cx + '" y="' + (yb + 16) + '" fill="' + EV_XLBL + '" font-size="10" text-anchor="middle">' + evDM(day.dt) + '</text>'; });
+  s += '<line x1="' + x0 + '" y1="' + yb + '" x2="' + (x0 + pw) + '" y2="' + yb + '" stroke="' + EV_AXIS + '"/></svg>';
+  return s;
+}
+
+/* ---- Tables ---- */
+function evRenderDayTable(m) {
+  document.getElementById('evDayHead').innerHTML =
+    '<tr><th>Fecha</th><th>Fase</th>' + m.active.map(c => '<th class="num">' + c.label.replace(' Ads','') + '</th>').join('') +
+    '<th class="num acc">Inversión</th><th class="num">Facturación</th><th class="num">ACOS</th></tr>';
+  document.getElementById('evDayBody').innerHTML = m.days.map(day => {
+    const plats = m.active.map(c => { const p = day.plats.find(x => x.key === c.key); return '<td class="num">' + fmtMoney(p ? p.inv : 0) + '</td>'; }).join('');
+    const phase = day.core ? '<span class="ke-chip ke-c-blue">Núcleo</span>' : '<span class="ke-chip ke-c-purple">Extensión</span>';
+    return '<tr><td><strong>' + evFmtDate(day.dt) + '</strong></td><td>' + phase + '</td>' + plats +
+      '<td class="num acc">' + fmtMoney(day.inv) + '</td><td class="num">' + fmtMoney(day.fact) + '</td><td class="num">' + fmtPct(day.acos,1) + '</td></tr>';
+  }).join('');
+  const platFoot = m.active.map(c => { const t = m.days.reduce((a, day) => { const p = day.plats.find(x => x.key === c.key); return a + (p ? p.inv : 0); }, 0); return '<td class="num">' + fmtMoney(t) + '</td>'; }).join('');
+  document.getElementById('evDayFoot').innerHTML =
+    '<tr><td colspan="2"><strong>Total evento</strong></td>' + platFoot +
+    '<td class="num acc"><strong>' + fmtMoney(m.inv) + '</strong></td><td class="num"><strong>' + fmtMoney(m.objetivo) + '</strong></td><td class="num">' + fmtPct(m.acosBlend,1) + '</td></tr>';
+}
+function evRenderPlatTable(m) {
+  const acosC = m.acosCore / 100, acosE = m.acosExt / 100;
+  document.getElementById('evPlatBody').innerHTML = m.active.map(c => {
+    const dp = m.dist[c.key], ic = m.invCore * dp / 100, ie = m.invExt * dp / 100, it = ic + ie;
+    const f = ic / acosC + (m.nExt > 0 ? ie / acosE : 0);
+    return '<tr><td><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:' + c.color + ';margin-right:7px"></span><strong>' + c.label + '</strong></td>' +
+      '<td class="num">' + fmtDec(dp,0) + '%</td><td class="num">' + fmtMoney(ic) + '</td><td class="num">' + fmtMoney(ie) + '</td><td class="num acc">' + fmtMoney(it) + '</td><td class="num">' + fmtMoney(f) + '</td></tr>';
+  }).join('');
+  document.getElementById('evPlatFoot').innerHTML =
+    '<tr><td><strong>Total</strong></td><td class="num">100%</td><td class="num"><strong>' + fmtMoney(m.invCore) + '</strong></td><td class="num"><strong>' + fmtMoney(m.invExt) + '</strong></td><td class="num acc"><strong>' + fmtMoney(m.inv) + '</strong></td><td class="num"><strong>' + fmtMoney(m.objetivo) + '</strong></td></tr>';
+}
+
+/* ---- Hover tooltip ---- */
+let evTipEl = null;
+function evTip() { if (!evTipEl) { evTipEl = document.createElement('div'); evTipEl.className = 'ev-tip'; document.body.appendChild(evTipEl); } return evTipEl; }
+function evBindTips(containerId) {
+  const c = document.getElementById(containerId); if (!c || c._tipBound) return; c._tipBound = true;
+  c.addEventListener('mousemove', e => {
+    const t = e.target.closest ? e.target.closest('[data-tip]') : null; const tip = evTip();
+    if (!t) { tip.classList.remove('on'); return; }
+    tip.innerHTML = t.getAttribute('data-tip'); tip.classList.add('on');
+    let x = e.clientX + 14, y = e.clientY + 14; const r = tip.getBoundingClientRect();
+    if (x + r.width > window.innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > window.innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  });
+  c.addEventListener('mouseleave', () => { evTip().classList.remove('on'); });
+}
+
+/* ---- Event persistence & defaults ---- */
+function evSave() { try { const data = {}; EV_F.forEach(id => data[id] = document.getElementById(id).value); localStorage.setItem('krabe-mediaplan-ev', JSON.stringify(data)); } catch(e) {} }
+function evLoad() { try { const data = JSON.parse(localStorage.getItem('krabe-mediaplan-ev')); if (!data) return; EV_F.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; }); } catch(e) {} }
+function evApplyDefaults() {
+  const set = (id, v) => { const el = document.getElementById(id); if (el && el.value === '') el.value = v; };
+  set('evEvento', 'Cyber Monday');
+  set('evInicio', '2026-11-02'); set('evFinCore', '2026-11-04'); set('evFinExt', '2026-11-09');
+  set('evPct', '85'); set('evCoreShare', '65'); set('evAcosCore', '8'); set('evAcosExt', '14');
+  if (['evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest'].every(id => document.getElementById(id).value === '')) {
+    document.getElementById('evDistMeta').value = 60; document.getElementById('evDistGoogle').value = 40;
+  }
+}
+
+/* ================= MODE SWITCH ================= */
+function switchMode(m) {
+  mode = m;
+  document.getElementById('viewMensual').style.display = m === 'mensual' ? '' : 'none';
+  document.getElementById('viewEvento').style.display = m === 'evento' ? '' : 'none';
+  document.getElementById('tabMensual').classList.toggle('active', m === 'mensual');
+  document.getElementById('tabEvento').classList.toggle('active', m === 'evento');
+  document.getElementById('hdrInvLbl').textContent = m === 'evento' ? 'Inversión total del evento' : 'Inversión total del mes';
+  try { localStorage.setItem('krabe-mediaplan-view', m); } catch(e) {}
+  if (m === 'evento') evRender(); else render();
+}
+
 /* ================= INIT ================= */
 F.forEach(id => document.getElementById(id).addEventListener('input', render));
-load(); applyDefaults(); setDefaultMonth(); render();
+EV_F.forEach(id => { const el = document.getElementById(id); el.addEventListener('input', evRender); el.addEventListener('change', evRender); });
+load(); applyDefaults(); setDefaultMonth();
+evLoad(); evApplyDefaults();
+render(); evRender();
+let savedView = 'mensual'; try { savedView = localStorage.getItem('krabe-mediaplan-view') || 'mensual'; } catch(e) {}
+switchMode(savedView);
 </script>
 </body>
 </html>
