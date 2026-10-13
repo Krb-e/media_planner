@@ -112,6 +112,7 @@ tr.ref td { color:var(--ke-muted); }
 .ke-kc.r::before { background:var(--ke-bad); } .ke-kc.g::before { background:var(--ke-green); }
 .ke-kc.o::before { background:var(--ke-warn); } .ke-kc.b::before { background:var(--ke-blue); }
 .ke-kc.p::before { background:var(--ke-purple); }
+.ke-kc.pc::before { background:var(--pc,var(--ke-orange)); }
 .ke-kl { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--ke-muted); margin-bottom:8px; }
 .ke-kv { font-family:'General Sans',sans-serif; font-weight:600; font-size:30px; line-height:1; color:var(--ke-orange); }
 .ke-kv.r { color:var(--ke-bad); } .ke-kv.g { color:var(--ke-green); } .ke-kv.o { color:var(--ke-warn); }
@@ -654,7 +655,23 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
         <div class="field">
           <label>% de inversión en días núcleo</label>
           <div class="in"><input type="number" id="evCoreShare" min="0" max="100" step="1" placeholder="65"><span class="suf">%</span></div>
-          <div class="hint">El resto se reparte en la extensión.</div>
+          <div class="hint">Pre-carga la ponderación por día (editable abajo).</div>
+        </div>
+      </div>
+
+      <div id="evWeightWrap">
+        <div class="ke-sec-head" style="margin-top:28px">
+          <div class="ke-sec-line"></div>
+          <span class="ke-sec-label">Ponderación de inversión por día · evento</span>
+          <span id="evWeightChip"></span>
+        </div>
+        <div class="ke-block">
+          <div class="ke-block-top"></div>
+          <div class="ke-bh"><span class="ke-bt">% de la inversión del evento por día</span><span class="ke-bt">Editable · default concentra en núcleo</span></div>
+          <div class="tbl-scroll"><table class="ke-t">
+            <thead><tr><th>Fecha</th><th>Fase</th><th class="num">% inversión</th></tr></thead>
+            <tbody id="evWeightBody"></tbody>
+          </table></div>
         </div>
       </div>
 
@@ -699,21 +716,16 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
         <span class="ke-sec-label">6 · Resto del mes</span>
         <span id="evRestoWindowChip"></span>
       </div>
-      <div class="ke-grid-4">
+      <div class="ke-grid-3">
         <div class="field">
-          <label>Inicio resto del mes</label>
-          <div class="in"><input type="date" id="evRestoInicio"></div>
-          <div class="hint">Auto: día siguiente al fin del evento.</div>
-        </div>
-        <div class="field">
-          <label>Fin resto del mes</label>
-          <div class="in"><input type="date" id="evRestoFin"></div>
-          <div class="hint">Auto: último día del mes · <a href="#" onclick="evRestoAuto(true);return false" style="color:var(--ke-orange);text-decoration:none">↻ recalcular</a></div>
+          <label>Cantidad de días</label>
+          <div class="in"><input type="number" id="evRestoDias" min="0" step="1" placeholder="0"></div>
+          <div class="hint">Días del mes fuera del evento (antes y/o después). <a href="#" onclick="evRestoDiasAuto();return false" style="color:var(--ke-orange);text-decoration:none">↻ auto</a></div>
         </div>
         <div class="field">
           <label>Objetivo de facturación · resto</label>
           <div class="in"><span class="pre">$</span><input type="number" id="evRestoObj" min="0" step="1" placeholder="0"></div>
-          <div class="hint">Facturación esperada en los días fuera del evento.</div>
+          <div class="hint">Facturación esperada en esos días.</div>
         </div>
         <div class="field">
           <label>ACOS límite · resto</label>
@@ -769,6 +781,12 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
         <div class="ke-kc b"><div class="ke-kl">Facturación · núcleo</div><div class="ke-kv b" id="evkFactCore">—</div><div class="ke-ks" id="evkFactCoreS">—</div></div>
         <div class="ke-kc p"><div class="ke-kl">Facturación · extensión</div><div class="ke-kv p" id="evkFactExt">—</div><div class="ke-ks" id="evkFactExtS">—</div></div>
       </div>
+
+      <div class="ke-sec-head" style="margin-top:24px">
+        <div class="ke-sec-line"></div>
+        <span class="ke-sec-label">Inversión por plataforma · evento</span>
+      </div>
+      <div class="ke-grid-4" id="evPlatCards"></div>
 
       <div class="ke-block" style="margin-top:16px">
         <div class="ke-block-top"></div>
@@ -834,6 +852,7 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
           <div class="ke-kc"><div class="ke-kl">ACOS límite · resto</div><div class="ke-kv w" id="evRkAcos">—</div><div class="ke-ks">Igual para todo el período</div></div>
           <div class="ke-kc g"><div class="ke-kl">ROAS · resto</div><div class="ke-kv g" id="evRkRoas">—</div><div class="ke-ks">Facturación ÷ inversión</div></div>
         </div>
+        <div class="ke-grid-4" id="evRestoPlatCards" style="margin-top:16px"></div>
         <div class="ke-block" style="margin-top:16px">
           <div class="ke-block-top"></div>
           <div class="ke-bh"><span class="ke-bt">Resumen por plataforma · Resto del mes</span><span class="ke-bt" id="evRestoMonth"></span></div>
@@ -857,6 +876,11 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
           <div class="ke-kc"><div class="ke-kl">ACOS combinado</div><div class="ke-kv w" id="evTkAcos">—</div><div class="ke-ks">Inversión total ÷ facturación total</div></div>
           <div class="ke-kc g"><div class="ke-kl">ROAS del mes</div><div class="ke-kv g" id="evTkRoas">—</div><div class="ke-ks" id="evTkRoasS">—</div></div>
         </div>
+        <div class="ke-sec-head" style="margin-top:20px">
+          <div class="ke-sec-line"></div>
+          <span class="ke-sec-label">Inversión por plataforma · total del mes</span>
+        </div>
+        <div class="ke-grid-4" id="evTotalPlatCards"></div>
       </div>
 
       <div class="ke-footer">
@@ -1333,6 +1357,7 @@ function resetAll() {
     if (!confirm('¿Empezar un plan de evento nuevo? Se borran los datos cargados.')) return;
     try { localStorage.removeItem('krabe-mediaplan-ev'); } catch(e) {}
     EV_F.forEach(id => document.getElementById(id).value = '');
+    evWeights = []; evWeightsAuto = true;
     evApplyDefaults(); evRender();
     return;
   }
@@ -1388,7 +1413,7 @@ let mode = 'mensual';
 const EV_F = ['evCliente','evEvento','evAutor','evInicio','evFinCore','evFinExt',
   'evMesNormal','evPct','evCoreShare','evAcos',
   'evDistMeta','evDistGoogle','evDistTiktok','evDistPinterest',
-  'evRestoInicio','evRestoFin','evRestoObj','evRestoAcos',
+  'evRestoDias','evRestoObj','evRestoAcos',
   'evRestoDistMeta','evRestoDistGoogle','evRestoDistTiktok','evRestoDistPinterest'];
 // Paleta de plataformas validada para fondo oscuro (CVD + separación a vista normal)
 const EV_CH = [
@@ -1410,52 +1435,92 @@ const fmtMoneyShort = n => {
   return '$ ' + Math.round(n);
 };
 
-function evCompute() {
+/* Ventana del evento (solo fechas) */
+function evWindow() {
   const start = evParseDate('evInicio'), coreEnd = evParseDate('evFinCore');
   let extEnd = evParseDate('evFinExt');
-  const mesNormal = val('evMesNormal'), pct = val('evPct');
-  const coreShare = val('evCoreShare'), acos = val('evAcos');
-
-  const dist = {}; let distSum = 0;
-  EV_CH.forEach(c => { const d = val(c.dist); dist[c.key] = (isFinite(d) && d > 0) ? d : 0; distSum += dist[c.key]; });
-  const active = EV_CH.filter(c => dist[c.key] > 0);
-
   if (!start || !coreEnd || start > coreEnd) return null;
   if (!extEnd || extEnd < coreEnd) extEnd = coreEnd;
   const nCore = evDaysInc(start, coreEnd);
   const nExt = Math.round((extEnd - coreEnd) / DAY_MS);
-  const nTotal = nCore + nExt;
+  return { start, coreEnd, extEnd, nCore, nExt, nTotal: nCore + nExt };
+}
+/* Ponderación de inversión por día (editable; default concentra en núcleo) */
+let evWeights = [];
+let evWeightsAuto = true;
+function evDefaultWeights(w) {
+  const cs = val('evCoreShare');
+  const s = (isFinite(cs) && cs >= 0 && cs <= 100) ? cs : 65;
+  const perCore = w.nCore > 0 ? (w.nExt > 0 ? s / w.nCore : 100 / w.nCore) : 0;
+  const perExt = w.nExt > 0 ? (100 - s) / w.nExt : 0;
+  const out = [];
+  for (let i = 0; i < w.nTotal; i++) out.push(+(i < w.nCore ? perCore : perExt).toFixed(2));
+  return out;
+}
+function evEnsureWeights(w) { if (evWeightsAuto || evWeights.length !== w.nTotal) evWeights = evDefaultWeights(w); }
+function evSetWeight(i, v) { evWeightsAuto = false; evWeights[i] = parseFloat(v); evRender(); }
+function evWeightsReset() { evWeightsAuto = true; evRender(); }
+function evRenderWeights() {
+  const w = evWindow();
+  const wrap = document.getElementById('evWeightWrap');
+  if (!w) { if (wrap) wrap.style.display = 'none'; return; }
+  if (wrap) wrap.style.display = '';
+  evEnsureWeights(w);
+  let rows = '';
+  for (let i = 0; i < w.nTotal; i++) {
+    const dt = new Date(w.start.getTime() + i * DAY_MS);
+    const phase = i < w.nCore ? '<span class="ke-chip ke-c-blue">Núcleo</span>' : '<span class="ke-chip ke-c-purple">Extensión</span>';
+    rows += '<tr><td><strong>' + evFmtDate(dt) + '</strong></td><td>' + phase + '</td>' +
+      '<td class="num"><input class="pct" type="number" min="0" max="100" step="0.5" value="' + (isFinite(evWeights[i]) ? evWeights[i] : 0) + '" onchange="evSetWeight(' + i + ', this.value)"></td></tr>';
+  }
+  document.getElementById('evWeightBody').innerHTML = rows;
+  const sum = evWeights.reduce((a, b) => a + (isFinite(b) ? b : 0), 0);
+  const ok = Math.round(sum) === 100;
+  evHtml('evWeightChip', '<span class="ke-chip ' + (ok ? 'ke-c-ok' : 'ke-c-warn') + '">Suma ' + fmtDec(sum,0) + '%</span>' +
+    (evWeightsAuto ? '' : ' <a href="#" onclick="evWeightsReset();return false" style="color:var(--ke-orange);text-decoration:none;font-size:10px;font-weight:700">↻ AUTO</a>'));
+}
+
+function evCompute() {
+  const mesNormal = val('evMesNormal'), pct = val('evPct'), acos = val('evAcos');
+  const dist = {}; let distSum = 0;
+  EV_CH.forEach(c => { const d = val(c.dist); dist[c.key] = (isFinite(d) && d > 0) ? d : 0; distSum += dist[c.key]; });
+  const active = EV_CH.filter(c => dist[c.key] > 0);
+
+  const w = evWindow();
+  if (!w) return null;
+  const { start, coreEnd, extEnd, nCore, nExt, nTotal } = w;
 
   const objetivo = (isFinite(mesNormal) && mesNormal > 0 && isFinite(pct) && pct > 0) ? mesNormal * pct / 100 : NaN;
-  const sRaw = (isFinite(coreShare) && coreShare >= 0 && coreShare <= 100) ? coreShare / 100 : NaN;
-  const s = nExt === 0 ? 1 : sRaw;
-  const okBase = isFinite(objetivo) && objetivo > 0 && isFinite(acos) && acos > 0 && acos <= 100 && isFinite(s);
+  const okBase = isFinite(objetivo) && objetivo > 0 && isFinite(acos) && acos > 0 && acos <= 100;
   if (!(okBase && Math.round(distSum) === 100)) return null;
 
-  // Un solo ACOS límite para todo el evento; concentración sobre la inversión.
-  const inv = objetivo * acos / 100;
-  const invCore = inv * s, invExt = inv * (1 - s);
-  const dInvCore = invCore / nCore;
-  const dInvExt = nExt > 0 ? invExt / nExt : 0;
-  const factCore = invCore / (acos / 100);
-  const factExt = nExt > 0 ? invExt / (acos / 100) : 0;
+  // Un solo ACOS límite; la ponderación por día reparte la inversión.
+  evEnsureWeights(w);
+  const wSum = evWeights.reduce((a, b) => a + (isFinite(b) && b > 0 ? b : 0), 0) || 1;
+  const inv = objetivo * acos / 100, acosF = acos / 100;
 
-  const days = [];
+  const days = []; let invCore = 0, invExt = 0;
   for (let i = 0; i < nTotal; i++) {
     const dt = new Date(start.getTime() + i * DAY_MS);
     const core = i < nCore;
-    const dInv = core ? dInvCore : dInvExt;
-    const fact = dInv / (acos / 100);
+    const wi = (isFinite(evWeights[i]) && evWeights[i] > 0) ? evWeights[i] : 0;
+    const dInv = inv * wi / wSum;
+    if (core) invCore += dInv; else invExt += dInv;
+    const fact = dInv / acosF;
     const plats = active.map(c => ({ key:c.key, color:c.color, label:c.label, inv: dInv * dist[c.key] / 100 }));
     days.push({ dt, core, inv:dInv, acos, fact, plats });
   }
   let acc = 0; days.forEach(d => { acc += d.fact; d.cum = acc; });
   const factCoreCum = days[nCore - 1].cum;
+  const factCore = invCore / acosF, factExt = invExt / acosF;
+  const s = inv > 0 ? invCore / inv : 0;
+
+  const platTotals = active.map(c => ({ key:c.key, color:c.color, label:c.label, dist:dist[c.key],
+    inv: inv * dist[c.key] / 100 }));
 
   return { start, coreEnd, extEnd, nCore, nExt, nTotal, objetivo, mesNormal, pct,
-    inv, invCore, invExt, dInvCore, dInvExt, factCore, factExt, acos,
-    acosBlend: acos, roas: objetivo / inv, s, dist, active, days,
-    factCoreCum, factCorePct: factCoreCum / objetivo * 100 };
+    inv, invCore, invExt, factCore, factExt, acos, acosBlend: acos, roas: objetivo / inv,
+    s, dist, active, days, platTotals, factCoreCum, factCorePct: factCoreCum / objetivo * 100 };
 }
 
 /* ---- Event render ---- */
@@ -1482,7 +1547,7 @@ function evRenderWindowChip() {
 
 function evRender() {
   evRenderDistChip(); evRenderObjAuto(); evRenderWindowChip();
-  evRenderRestoDistChip(); evRenderRestoWindowChip();
+  evRenderRestoDistChip(); evRenderRestoWindowChip(); evRenderWeights();
   const m = evCompute();
   document.getElementById('eventoResults').style.display = m ? '' : 'none';
   document.getElementById('eventoEmpty').style.display = m ? 'none' : '';
@@ -1501,8 +1566,8 @@ function evRender() {
   evSet('evkObj', fmtMoney(m.objetivo)); evHtml('evkObjS', fmtMoney(m.mesNormal) + ' × ' + fmtDec(m.pct,0) + '% del mes');
   evSet('evkAcos', fmtPct(m.acos)); evHtml('evkAcosS', 'Límite único para todo el evento');
   evSet('evkRoas', fmtDec(m.roas,2) + 'x');
-  evSet('evkInvCore', fmtMoney(m.invCore)); evHtml('evkInvCoreS', fmtDec(m.s*100,0) + '% del total · ' + fmtMoney(m.dInvCore) + '/día');
-  evSet('evkInvExt', fmtMoney(m.invExt)); evHtml('evkInvExtS', m.nExt > 0 ? (fmtDec((1-m.s)*100,0) + '% del total · ' + fmtMoney(m.dInvExt) + '/día') : 'Sin extensión');
+  evSet('evkInvCore', fmtMoney(m.invCore)); evHtml('evkInvCoreS', fmtDec(m.s*100,0) + '% del total · ' + m.nCore + ' días');
+  evSet('evkInvExt', fmtMoney(m.invExt)); evHtml('evkInvExtS', m.nExt > 0 ? (fmtDec((1-m.s)*100,0) + '% del total · ' + m.nExt + ' días') : 'Sin extensión');
   evSet('evkFactCore', fmtMoney(m.factCore)); evHtml('evkFactCoreS', fmtDec(m.factCore/m.objetivo*100,0) + '% del objetivo · ' + m.nCore + ' días');
   evSet('evkFactExt', fmtMoney(m.factExt)); evHtml('evkFactExtS', m.nExt > 0 ? (fmtDec(m.factExt/m.objetivo*100,0) + '% del objetivo · ' + m.nExt + ' días') : 'Sin extensión');
 
@@ -1511,7 +1576,8 @@ function evRender() {
   evSet('evChartInvMonth', rangeTxt); evSet('evChartRevMonth', rangeTxt);
   document.getElementById('evChartInv').innerHTML = evBars(m);
   document.getElementById('evChartInvLeg').innerHTML = m.active.map(c => '<span class="ev-leg"><i style="background:' + c.color + '"></i>' + c.label + '</span>').join('');
-  evHtml('evChartInvNote', 'Inversión diaria repartida por plataforma. Los días núcleo concentran ' + fmtDec(m.s*100,0) + '% del presupuesto (' + fmtMoney(m.dInvCore) + '/día)' + (m.nExt > 0 ? ' y la extensión el resto (' + fmtMoney(m.dInvExt) + '/día).' : '.'));
+  evPlatCards('evPlatCards', m.platTotals.map(p => ({ label:p.label, color:p.color, inv:p.inv, sub: fmtDec(p.dist,0) + '% del presupuesto del evento' })));
+  evHtml('evChartInvNote', 'Inversión diaria según la ponderación por día. Los días núcleo concentran ' + fmtDec(m.s*100,0) + '% del presupuesto; ajustá el % de cada día en la tabla de ponderación.');
   document.getElementById('evChartRev').innerHTML = evRevenue(m);
   evHtml('evChartRevNote', 'La facturación acumulada llega al objetivo de ' + fmtMoney(m.objetivo) + '. Al cerrar los días núcleo ya se alcanza ' + fmtMoney(m.factCoreCum) + ' (' + fmtDec(m.factCorePct,0) + '% del objetivo).');
   document.getElementById('evChartAcos').innerHTML = evAcosChart(m);
@@ -1635,28 +1701,30 @@ function evRenderPlatTable(m) {
     '<tr><td><strong>Total</strong></td><td class="num">100%</td><td class="num"><strong>' + fmtMoney(m.invCore) + '</strong></td><td class="num"><strong>' + fmtMoney(m.invExt) + '</strong></td><td class="num acc"><strong>' + fmtMoney(m.inv) + '</strong></td><td class="num"><strong>' + fmtMoney(m.objetivo) + '</strong></td></tr>';
 }
 
-/* ---- Resto del mes (días de noviembre fuera del evento) ---- */
-function evFmtISO(dt) { return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'); }
-function evRestoAuto(force) {
-  const end = evParseDate('evFinExt') || evParseDate('evFinCore'); if (!end) return;
-  const ri = new Date(end.getTime() + DAY_MS);
-  const rf = new Date(ri.getFullYear(), ri.getMonth() + 1, 0);
-  const iEl = document.getElementById('evRestoInicio'), fEl = document.getElementById('evRestoFin');
-  if (force || !iEl.value) iEl.value = evFmtISO(ri);
-  if (force || !fEl.value) fEl.value = evFmtISO(rf);
-  if (force) evRender();
+/* ---- Resto del mes (cantidad de días fuera del evento, antes y/o después) ---- */
+function evDaysInMonthOf(dt) { return new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate(); }
+function evRestoDiasAuto() {
+  const w = evWindow(); if (!w) return;
+  const n = Math.max(0, evDaysInMonthOf(w.start) - w.nTotal);
+  document.getElementById('evRestoDias').value = n;
+  evRender();
+}
+function evPlatCards(id, items) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = items.map(p =>
+    '<div class="ke-kc pc" style="--pc:' + p.color + '"><div class="ke-kl">' + p.label + '</div>' +
+    '<div class="ke-kv" style="color:' + p.color + '">' + fmtMoney(p.inv) + '</div>' +
+    '<div class="ke-ks">' + p.sub + '</div></div>').join('');
 }
 function evRestoCompute() {
-  const ri = evParseDate('evRestoInicio'), rf = evParseDate('evRestoFin');
+  const nDays = Math.round(val('evRestoDias'));
   const obj = val('evRestoObj'), acos = val('evRestoAcos');
   const dist = {}; let distSum = 0;
   EV_CH.forEach(c => { const d = val(c.distResto); dist[c.key] = (isFinite(d) && d > 0) ? d : 0; distSum += dist[c.key]; });
   const active = EV_CH.filter(c => dist[c.key] > 0);
-  if (!ri || !rf || ri > rf) return null;
-  if (!(isFinite(obj) && obj > 0 && isFinite(acos) && acos > 0 && acos <= 100 && Math.round(distSum) === 100)) return null;
-  const nDays = evDaysInc(ri, rf);
+  if (!(isFinite(nDays) && nDays > 0 && isFinite(obj) && obj > 0 && isFinite(acos) && acos > 0 && acos <= 100 && Math.round(distSum) === 100)) return null;
   const inv = obj * acos / 100;
-  return { ri, rf, nDays, obj, acos, inv, daily: inv / nDays, roas: obj / inv, dist, active };
+  return { nDays, obj, acos, inv, daily: inv / nDays, roas: obj / inv, dist, active };
 }
 function evRenderRestoDistChip() {
   let sum = 0; EV_CH.forEach(c => { const d = val(c.distResto); if (isFinite(d)) sum += d; });
@@ -1664,17 +1732,18 @@ function evRenderRestoDistChip() {
   evHtml('evRestoDistChip', '<span class="ke-chip ' + (ok ? 'ke-c-ok' : 'ke-c-danger') + '">Suma ' + fmtDec(sum,0) + '%' + (ok ? '' : ' · debe ser 100%') + '</span>');
 }
 function evRenderRestoWindowChip() {
-  const ri = evParseDate('evRestoInicio'), rf = evParseDate('evRestoFin');
-  if (!ri || !rf || ri > rf) { evHtml('evRestoWindowChip', ''); return; }
-  evHtml('evRestoWindowChip', '<span class="ke-chip ke-c-neutral">' + evDaysInc(ri, rf) + ' días</span>');
+  const n = Math.round(val('evRestoDias'));
+  if (!(isFinite(n) && n > 0)) { evHtml('evRestoWindowChip', ''); return; }
+  evHtml('evRestoWindowChip', '<span class="ke-chip ke-c-neutral">' + n + ' días</span>');
 }
 function evRenderResto(r) {
   evSet('evRkInv', fmtMoney(r.inv)); evHtml('evRkInvS', r.nDays + ' días · ' + fmtMoney(r.daily) + '/día');
   evSet('evRkObj', fmtMoney(r.obj));
   evSet('evRkAcos', fmtPct(r.acos));
   evSet('evRkRoas', fmtDec(r.roas,2) + 'x');
-  evSet('evRestoMonth', evFmtDate(r.ri) + ' – ' + evFmtDate(r.rf));
+  evSet('evRestoMonth', r.nDays + ' días');
   evHtml('evRestoRangeChip', '<span class="ke-chip ke-c-accent">' + r.nDays + ' días fuera del evento</span>');
+  evPlatCards('evRestoPlatCards', r.active.map(c => ({ label:c.label, color:c.color, inv: r.inv * r.dist[c.key] / 100, sub: fmtDec(r.dist[c.key],0) + '% del resto del mes' })));
   const ac = r.acos / 100;
   document.getElementById('evRestoPlatBody').innerHTML = r.active.map(c => {
     const dp = r.dist[c.key], inv = r.inv * dp / 100, f = inv / ac, daily = inv / r.nDays;
@@ -1690,6 +1759,10 @@ function evRenderTotal(m, r) {
   evSet('evTkObj', fmtMoney(factT)); evHtml('evTkObjS', 'Evento ' + fmtMoney(m.objetivo) + ' · Resto ' + fmtMoney(r.obj));
   evSet('evTkAcos', fmtPct(acosT));
   evSet('evTkRoas', fmtDec(roasT,2) + 'x'); evHtml('evTkRoasS', (m.nTotal + r.nDays) + ' días en total');
+  const map = {};
+  m.platTotals.forEach(p => { map[p.key] = { label:p.label, color:p.color, ev:p.inv, re:0 }; });
+  r.active.forEach(c => { const ri = r.inv * r.dist[c.key] / 100; if (map[c.key]) map[c.key].re = ri; else map[c.key] = { label:c.label, color:c.color, ev:0, re:ri }; });
+  evPlatCards('evTotalPlatCards', EV_CH.filter(c => map[c.key]).map(c => { const k = map[c.key]; return { label:k.label, color:k.color, inv:k.ev + k.re, sub: 'Ev ' + fmtMoney(k.ev) + ' · Rt ' + fmtMoney(k.re) }; }));
 }
 
 /* ---- Hover tooltip ---- */
@@ -1710,8 +1783,8 @@ function evBindTips(containerId) {
 }
 
 /* ---- Event persistence & defaults ---- */
-function evSave() { try { const data = {}; EV_F.forEach(id => data[id] = document.getElementById(id).value); localStorage.setItem('krabe-mediaplan-ev', JSON.stringify(data)); } catch(e) {} }
-function evLoad() { try { const data = JSON.parse(localStorage.getItem('krabe-mediaplan-ev')); if (!data) return; EV_F.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; }); } catch(e) {} }
+function evSave() { try { const data = {}; EV_F.forEach(id => data[id] = document.getElementById(id).value); data._w = evWeights; data._wAuto = evWeightsAuto; localStorage.setItem('krabe-mediaplan-ev', JSON.stringify(data)); } catch(e) {} }
+function evLoad() { try { const data = JSON.parse(localStorage.getItem('krabe-mediaplan-ev')); if (!data) return; EV_F.forEach(id => { if (data[id] !== undefined) document.getElementById(id).value = data[id]; }); if (Array.isArray(data._w)) evWeights = data._w.map(Number); if (typeof data._wAuto === 'boolean') evWeightsAuto = data._wAuto; } catch(e) {} }
 function evApplyDefaults() {
   const set = (id, v) => { const el = document.getElementById(id); if (el && el.value === '') el.value = v; };
   set('evEvento', 'Cyber Monday');
@@ -1724,7 +1797,10 @@ function evApplyDefaults() {
   if (['evRestoDistMeta','evRestoDistGoogle','evRestoDistTiktok','evRestoDistPinterest'].every(id => document.getElementById(id).value === '')) {
     document.getElementById('evRestoDistMeta').value = 60; document.getElementById('evRestoDistGoogle').value = 40;
   }
-  evRestoAuto(false);
+  if (document.getElementById('evRestoDias').value === '') {
+    const w = evWindow();
+    document.getElementById('evRestoDias').value = w ? Math.max(0, evDaysInMonthOf(w.start) - w.nTotal) : 22;
+  }
 }
 
 /* ================= MODE SWITCH ================= */
