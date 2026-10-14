@@ -1,22 +1,31 @@
 # Krab-e Media Planner
 
-Herramienta estática (un solo `src/index.html`) para planificar medios, publicada en Vercel:
+Herramienta estática (un solo `index.html`) para planificar medios, publicada en Vercel:
 
 - Producción: https://mediaplan.krab-e.space
 - Proyecto Vercel: `kb-data-projects/krabe-media-planner`
 
+Dos vistas en la misma app (se eligen con las pestañas de arriba):
+
+- **Plan mensual**: proyección de inversión por ACOS objetivo.
+- **Plan de evento (Cyber / Hot Sale / Black Friday)**: ventana por fases
+  (Pre-Cyber · Cyber Monday · Cyber Week), ponderación de inversión por día,
+  media plan por campaña y día, resto del mes y AdMedia fuera de ACOS.
+
 ## Estructura
 
 ```
-src/index.html   # app completa (HTML + CSS + JS inline, sin build)
+index.html   # app completa (HTML + CSS + JS inline, sin build)
 ```
+
+> `index.html` está en la raíz del repo y es el archivo que Vercel publica en `/`.
 
 ## Desarrollo local
 
-Abrir `src/index.html` en el navegador, o servirlo:
+Abrir `index.html` en el navegador, o servirlo:
 
 ```bash
-npx serve src
+npx serve .
 ```
 
 ## Deploy
