@@ -184,6 +184,9 @@ table.ke-t select option { background:var(--ke-card); color:var(--ke-text); }
 .ke-tab { font-family:'General Sans',sans-serif; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; cursor:pointer; padding:12px 16px; background:none; border:none; border-bottom:2px solid transparent; color:var(--ke-muted); transition:color .15s,border-color .15s; margin-bottom:-1px; }
 .ke-tab:hover { color:var(--ke-text); }
 .ke-tab.active { color:var(--ke-orange); border-bottom-color:var(--ke-orange); }
+.ke-tab-cyber { color:var(--ke-orange); border-bottom-color:rgba(255,112,10,.45); background:rgba(255,112,10,.07); border-top-left-radius:7px; border-top-right-radius:7px; }
+.ke-tab-cyber:hover { color:#ff8530; background:rgba(255,112,10,.12); }
+.ke-tab-cyber.active { border-bottom-color:var(--ke-orange); background:rgba(255,112,10,.12); }
 input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; font-size:15px; font-weight:500; background:transparent; border:none; outline:none; color:var(--ke-text); width:100%; }
 
 /* ===== CHARTS (event view) ===== */
@@ -258,7 +261,7 @@ input[type=date] { color-scheme:dark; font-family:'General Sans',sans-serif; fon
   <!-- ============ MODE TABS ============ -->
   <div class="ke-tabs no-print">
     <button type="button" class="ke-tab active" id="tabMensual" onclick="switchMode('mensual')">Plan mensual</button>
-    <button type="button" class="ke-tab" id="tabEvento" onclick="switchMode('evento')">Plan de evento · Cyber ⚡ / Hot Sale</button>
+    <button type="button" class="ke-tab ke-tab-cyber" id="tabEvento" onclick="switchMode('evento')">Plan de evento · Cyber ⚡ / Hot Sale</button>
   </div>
 
   <div id="viewMensual">
